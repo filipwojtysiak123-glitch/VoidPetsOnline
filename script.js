@@ -8,40 +8,38 @@
    PET DEFINITIONS
 ========================================= */
 
-const PETS = {
+const PETS = {// =========================
+// PET VARIANTS
+// =========================
 
-    void_cat: {
-        name: "Void Cat",
-        rarity: "Common",
-        power: 5,
-        chance: 50,
-        icon: "🐱"
+const PET_VARIANTS = {
+    normal: {
+        name: "Normal",
+        multiplier: 1,
+        chance: 94.44,
+        emoji: ""
     },
 
-    void_dog: {
-        name: "Void Dog",
-        rarity: "Uncommon",
-        power: 10,
-        chance: 30,
-        icon: "🐶"
-    },
-
-    void_bat: {
-        name: "Void Bat",
-        rarity: "Rare",
-        power: 20,
-        chance: 15,
-        icon: "🦇"
-    },
-
-    void_dragon: {
-        name: "Void Dragon",
-        rarity: "Legendary",
-        power: 50,
+    shiny: {
+        name: "Shiny",
+        multiplier: 2,
         chance: 5,
-        icon: "🐉"
-    }
+        emoji: "✨"
+    },
 
+    gold: {
+        name: "Gold",
+        multiplier: 5,
+        chance: 0.5,
+        emoji: "🟡"
+    },
+
+    rainbow: {
+        name: "Rainbow",
+        multiplier: 10,
+        chance: 0.05,
+        emoji: "🌈"
+    }
 };
 
 
