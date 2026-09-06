@@ -7,15 +7,20 @@
 
     <title>VoidPetsOnline</title>
 
-    <meta name="description"
-        content="VoidPetsOnline - Hatch eggs, collect pets, earn Diamonds and compete in leaderboards.">
+    <meta
+        name="description"
+        content="VoidPetsOnline - Hatch eggs, collect pets, earn Diamonds, build RAP and compete in leaderboards."
+    >
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <!-- TOP BAR -->
+    <!-- =========================
+         TOP BAR
+    ========================== -->
+
     <header class="topbar">
 
         <div class="logo">
@@ -25,11 +30,18 @@
         <div class="currencies">
 
             <div class="currency">
-                🪙 <span id="coins">1000</span>
+                🪙
+                <span id="coins">0</span>
             </div>
 
             <div class="currency">
-                💎 <span id="diamonds">100</span>
+                💎
+                <span id="diamonds">0</span>
+            </div>
+
+            <div class="currency">
+                📊
+                <span id="rap">0</span> RAP
             </div>
 
         </div>
@@ -37,8 +49,13 @@
     </header>
 
 
-    <!-- MAIN MENU -->
+    <!-- =========================
+         MAIN
+    ========================== -->
+
     <main>
+
+        <!-- MENU -->
 
         <section id="menu" class="screen">
 
@@ -62,12 +79,27 @@
                     🏆 Leaderboards
                 </button>
 
+                <button onclick="showScreen('clans')">
+                    🛡️ Clans
+                </button>
+
+                <button onclick="showScreen('rewards')">
+                    🎁 Rewards
+                </button>
+
+                <button onclick="showScreen('races')">
+                    🏁 Clan Races
+                </button>
+
             </div>
 
         </section>
 
 
-        <!-- EGGS -->
+        <!-- =========================
+             EGGS
+        ========================== -->
+
         <section id="eggs" class="screen hidden">
 
             <button class="back" onclick="showScreen('menu')">
@@ -76,28 +108,53 @@
 
             <h2>🥚 Eggs</h2>
 
+            <p class="subtitle">
+                Hatch eggs and discover new pets.
+            </p>
+
             <div class="egg">
 
-                <div class="egg-image">
+                <div class="egg-image" id="egg-image">
                     🥚
                 </div>
 
                 <h3>Void Egg</h3>
 
-                <p>Cost: 100 Coins</p>
+                <p>
+                    Cost:
+                    <strong>100 Coins</strong>
+                </p>
 
-                <button onclick="hatchEgg()">
+                <div class="chances">
+
+                    <p>🐱 Common — 50%</p>
+                    <p>🐶 Rare — 30%</p>
+                    <p>🦊 Epic — 15%</p>
+                    <p>🐉 Legendary — 5%</p>
+
+                </div>
+
+                <button
+                    id="hatch-button"
+                    onclick="hatchEgg()"
+                >
                     Hatch Egg
                 </button>
 
             </div>
 
-            <div id="result" class="result hidden"></div>
+            <div
+                id="result"
+                class="result hidden"
+            ></div>
 
         </section>
 
 
-        <!-- PETS -->
+        <!-- =========================
+             PETS
+        ========================== -->
+
         <section id="pets" class="screen hidden">
 
             <button class="back" onclick="showScreen('menu')">
@@ -106,15 +163,30 @@
 
             <h2>🐾 Your Pets</h2>
 
+            <p>
+                Total Pets:
+                <strong id="pet-count">0</strong>
+            </p>
+
             <div id="pet-list">
-                <p>You don't have any pets yet.</p>
+
+                <p>
+                    You don't have any pets yet.
+                </p>
+
             </div>
 
         </section>
 
 
-        <!-- LEADERBOARDS -->
-        <section id="leaderboards" class="screen hidden">
+        <!-- =========================
+             LEADERBOARDS
+        ========================== -->
+
+        <section
+            id="leaderboards"
+            class="screen hidden"
+        >
 
             <button class="back" onclick="showScreen('menu')">
                 ← Back
@@ -122,23 +194,168 @@
 
             <h2>🏆 Leaderboards</h2>
 
+
+            <!-- WEEKLY -->
+
             <div class="leaderboard">
 
-                <h3>💎 Weekly Diamonds</h3>
+                <h3>
+                    💎 Weekly Diamonds
+                </h3>
 
-                <p>1. PlayerOne — 50,000 💎</p>
-                <p>2. VoidMaster — 42,500 💎</p>
-                <p>3. Ne3x — 30,000 💎</p>
+                <p>
+                    This leaderboard is based on
+                    Diamonds earned.
+                </p>
+
+                <div class="leader-row">
+                    <span>🥇 PlayerOne</span>
+                    <strong>50,000 💎</strong>
+                </div>
+
+                <div class="leader-row">
+                    <span>🥈 VoidMaster</span>
+                    <strong>42,500 💎</strong>
+                </div>
+
+                <div class="leader-row">
+                    <span>🥉 Ne3x</span>
+                    <strong>30,000 💎</strong>
+                </div>
+
+                <div class="leader-row player-row">
+                    <span>You</span>
+                    <strong id="weekly-player">
+                        0 💎
+                    </strong>
+                </div>
 
             </div>
 
+
+            <!-- MONTHLY -->
+
             <div class="leaderboard">
 
-                <h3>📊 Monthly RAP</h3>
+                <h3>
+                    📊 Monthly RAP
+                </h3>
 
-                <p>1. PlayerOne — 1,500,000 RAP</p>
-                <p>2. VoidMaster — 1,200,000 RAP</p>
-                <p>3. Ne3x — 900,000 RAP</p>
+                <p>
+                    This leaderboard is based on
+                    your total RAP.
+                </p>
+
+                <div class="leader-row">
+                    <span>🥇 PlayerOne</span>
+                    <strong>1,500,000 RAP</strong>
+                </div>
+
+                <div class="leader-row">
+                    <span>🥈 VoidMaster</span>
+                    <strong>1,200,000 RAP</strong>
+                </div>
+
+                <div class="leader-row">
+                    <span>🥉 Ne3x</span>
+                    <strong>900,000 RAP</strong>
+                </div>
+
+                <div class="leader-row player-row">
+                    <span>You</span>
+                    <strong id="monthly-player">
+                        0 RAP
+                    </strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             CLANS
+        ========================== -->
+
+        <section id="clans" class="screen hidden">
+
+            <button class="back" onclick="showScreen('menu')">
+                ← Back
+            </button>
+
+            <h2>🛡️ Clans</h2>
+
+            <div class="feature-card">
+
+                <div class="feature-icon">
+                    🛡️
+                </div>
+
+                <h3>Clan System</h3>
+
+                <p>
+                    Create or join a clan and compete
+                    with other clans.
+                </p>
+
+                <button onclick="createClan()">
+                    Create Clan
+                </button>
+
+            </div>
+
+            <div id="clan-info" class="feature-card hidden"></div>
+
+        </section>
+
+
+        <!-- =========================
+             REWARDS
+        ========================== -->
+
+        <section id="rewards" class="screen hidden">
+
+            <button class="back" onclick="showScreen('menu')">
+                ← Back
+            </button>
+
+            <h2>🎁 Rewards</h2>
+
+            <div class="feature-card">
+
+                <h3>Future Rewards</h3>
+
+                <p>
+                    Rewards for ranks, events,
+                    clans and other achievements
+                    will appear here.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             CLAN RACES
+        ========================== -->
+
+        <section id="races" class="screen hidden">
+
+            <button class="back" onclick="showScreen('menu')">
+                ← Back
+            </button>
+
+            <h2>🏁 Clan Races</h2>
+
+            <div class="feature-card">
+
+                <h3>Coming Soon</h3>
+
+                <p>
+                    Clans will compete against each
+                    other in special races.
+                </p>
 
             </div>
 
@@ -147,8 +364,20 @@
     </main>
 
 
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
     <footer>
-        VoidPetsOnline © 2026
+
+        <p>
+            VoidPetsOnline © 2026
+        </p>
+
+        <p>
+            Game in development
+        </p>
+
     </footer>
 
 
