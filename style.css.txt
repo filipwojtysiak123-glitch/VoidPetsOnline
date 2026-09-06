@@ -1,0 +1,183 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #111118;
+    color: white;
+}
+
+#game {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* LEFT MENU */
+
+#sidebar {
+    width: 220px;
+    background: #191923;
+    padding: 20px;
+    border-right: 1px solid #30303d;
+}
+
+#sidebar h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 22px;
+}
+
+nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+nav button {
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #252532;
+    color: white;
+    cursor: pointer;
+    text-align: left;
+    font-size: 15px;
+}
+
+nav button:hover {
+    background: #353546;
+}
+
+/* MAIN */
+
+#main {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+.panel,
+.egg,
+.pet-card,
+.world-card {
+    background: #1b1b26;
+    border: 1px solid #30303d;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+.panel h3 {
+    margin-bottom: 8px;
+}
+
+/* PET */
+
+.pet-card {
+    width: 180px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.pet-card:hover {
+    background: #292938;
+}
+
+.pet-image {
+    font-size: 60px;
+    margin-bottom: 10px;
+}
+
+/* BUTTONS */
+
+button {
+    font-family: inherit;
+}
+
+.egg button,
+.world-card button {
+    margin-top: 10px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background: #6c4cff;
+    color: white;
+    cursor: pointer;
+}
+
+.egg button:hover,
+.world-card button:hover {
+    background: #8066ff;
+}
+
+/* LOCKED */
+
+.locked {
+    opacity: 0.5;
+}
+
+/* RIGHT PANEL */
+
+#right-panel {
+    width: 260px;
+    background: #191923;
+    padding: 20px;
+    border-left: 1px solid #30303d;
+}
+
+.currency {
+    background: #252532;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+#pet-info {
+    margin-top: 25px;
+    padding: 15px;
+    background: #20202c;
+    border-radius: 10px;
+}
+
+/* HIDDEN */
+
+.hidden {
+    display: none;
+}
+
+/* PHONE */
+
+@media (max-width: 800px) {
+
+    #game {
+        flex-direction: column;
+    }
+
+    #sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #30303d;
+    }
+
+    nav {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    #main {
+        padding: 20px;
+    }
+
+    #right-panel {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid #30303d;
+    }
+}

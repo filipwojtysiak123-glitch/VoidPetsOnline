@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Void Pets Online</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="game">
+
+        <!-- LEFT SIDEBAR -->
+        <aside id="sidebar">
+
+            <h1>VOID PETS</h1>
+
+            <nav>
+                <button onclick="showPage('home')">🏠 Home</button>
+                <button onclick="showPage('eggs')">🥚 Eggs</button>
+                <button onclick="showPage('pets')">🐾 Pets</button>
+                <button onclick="showPage('inventory')">🎒 Inventory</button>
+                <button onclick="showPage('worlds')">🌎 Worlds</button>
+                <button onclick="showPage('shop')">🛒 Shop</button>
+                <button onclick="showPage('daily')">🎁 Daily</button>
+            </nav>
+
+        </aside>
+
+
+        <!-- MAIN CONTENT -->
+        <main id="main">
+
+            <!-- HOME -->
+            <section id="home" class="page">
+
+                <h2>🏠 Home</h2>
+
+                <div class="panel">
+                    <h3>📢 Announcements</h3>
+                    <p>Welcome to Void Pets Online!</p>
+                </div>
+
+                <div class="panel">
+                    <h3>ℹ️ Information</h3>
+                    <p>More information coming soon.</p>
+                </div>
+
+                <div class="panel">
+                    <h3>📋 Update Log</h3>
+                    <p>Version 0.1 — Game development started.</p>
+                </div>
+
+                <div class="panel">
+                    <h3>💬 Chat</h3>
+                    <p>Chat will be added later.</p>
+                </div>
+
+                <div class="panel">
+                    <h3>🔄 Trading</h3>
+                    <p>Trading will be added later.</p>
+                </div>
+
+            </section>
+
+
+            <!-- EGGS -->
+            <section id="eggs" class="page hidden">
+
+                <h2>🥚 Eggs</h2>
+
+                <div class="egg">
+                    <h3>Basic Egg</h3>
+                    <p>Price: 💰 100 Coins</p>
+
+                    <button onclick="openEgg()">OPEN EGG</button>
+                </div>
+
+            </section>
+
+
+            <!-- PETS -->
+            <section id="pets" class="page hidden">
+
+                <h2>🐾 Pets</h2>
+
+                <div class="pet-card" onclick="selectPet('Void Cat')">
+                    <div class="pet-image">🐱</div>
+
+                    <h3>Void Cat</h3>
+                    <p>Common</p>
+                    <p>Power: 1</p>
+                </div>
+
+            </section>
+
+
+            <!-- INVENTORY -->
+            <section id="inventory" class="page hidden">
+
+                <h2>🎒 Inventory</h2>
+
+                <p>Your inventory is empty.</p>
+
+            </section>
+
+
+            <!-- WORLDS -->
+            <section id="worlds" class="page hidden">
+
+                <h2>🌎 Worlds</h2>
+
+                <div class="world-card">
+                    <h3>🌱 Void World</h3>
+                    <p>Price: Free</p>
+
+                    <button>ENTER</button>
+                </div>
+
+                <div class="world-card locked">
+                    <h3>🔒 Unknown World</h3>
+                    <p>Coming Soon</p>
+                </div>
+
+            </section>
+
+
+            <!-- SHOP -->
+            <section id="shop" class="page hidden">
+
+                <h2>🛒 Shop</h2>
+
+                <p>Shop coming soon.</p>
+
+            </section>
+
+
+            <!-- DAILY -->
+            <section id="daily" class="page hidden">
+
+                <h2>🎁 Daily Reward</h2>
+
+                <p>Daily rewards coming soon.</p>
+
+            </section>
+
+        </main>
+
+
+        <!-- RIGHT PANEL -->
+        <aside id="right-panel">
+
+            <div class="currency">
+                💰 <span id="coins">0</span>
+            </div>
+
+            <div class="currency">
+                💎 <span id="gems">0</span>
+            </div>
+
+            <div id="pet-info">
+
+                <h2>🐾 Pet Info</h2>
+
+                <p>Select a pet.</p>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

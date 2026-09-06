@@ -1,0 +1,95 @@
+function showPage(pageId) {
+    const pages = document.querySelectorAll(".page");
+
+    pages.forEach(page => {
+        page.classList.add("hidden");
+    });
+
+    const selectedPage = document.getElementById(pageId);
+
+    if (selectedPage) {
+        selectedPage.classList.remove("hidden");
+    }
+}
+
+
+// TESTOWE COINS
+let coins = 1000;
+let gems = 100;
+
+document.getElementById("coins").textContent = coins;
+document.getElementById("gems").textContent = gems;
+
+
+// OTWIERANIE JAJKA
+function openEgg() {
+
+    const eggPrice = 100;
+
+    if (coins < eggPrice) {
+        alert("You don't have enough Coins!");
+        return;
+    }
+
+    coins -= eggPrice;
+
+    document.getElementById("coins").textContent = coins;
+
+    alert("You opened the Basic Egg!");
+}
+
+
+// WYBÓR PETA
+function selectPet(petName) {
+
+    const petInfo = document.getElementById("pet-info");
+
+    petInfo.innerHTML = `
+        <h2>🐾 ${petName}</h2>
+
+        <p>Rarity: Common</p>
+        <p>Power: 1</p>
+
+        <button onclick="equipPet('${petName}')">
+            Equip
+        </button>
+    `;
+}
+
+
+// EQUIP PETA
+function equipPet(petName) {
+
+    const petInfo = document.getElementById("pet-info");
+
+    petInfo.innerHTML = `
+        <h2>🐾 ${petName}</h2>
+
+        <p>Rarity: Common</p>
+        <p>Power: 1</p>
+
+        <p>✅ Equipped</p>
+
+        <button onclick="unequipPet('${petName}')">
+            Unequip
+        </button>
+    `;
+}
+
+
+// UNEQUIP PETA
+function unequipPet(petName) {
+
+    const petInfo = document.getElementById("pet-info");
+
+    petInfo.innerHTML = `
+        <h2>🐾 ${petName}</h2>
+
+        <p>Rarity: Common</p>
+        <p>Power: 1</p>
+
+        <button onclick="equipPet('${petName}')">
+            Equip
+        </button>
+    `;
+}
