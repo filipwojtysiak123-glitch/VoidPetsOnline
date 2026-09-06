@@ -1,135 +1,470 @@
-let coins = 1000;
-let diamonds = 100;
+/* =========================================================
+   VoidPetsOnline
+   Main Game Script
+========================================================= */
 
-let pets = [];
+
+/* =========================================================
+   PLAYER DATA
+========================================================= */
+
+let player = {
+
+    coins: 1000,
+
+    diamonds: 100,
+
+    pets: [],
+
+    clan: null
+
+};
 
 
-// ============================
-// SCREEN SYSTEM
-// ============================
+/* =========================================================
+   PET DATABASE
+========================================================= */
 
-function showScreen(screenName) {
+const PETS = [
 
-    const screens = document.querySelectorAll(".screen");
+    {
+        name: "Void Cat",
+        rarity: "Common",
+        power: 5,
+        icon: "🐱",
+        chance: 50
+    },
 
-    screens.forEach(screen => {
-        screen.classList.add("hidden");
-    });
+    {
+        name: "Void Dog",
+        rarity: "Rare",
+        power: 15,
+        icon: "🐶",
+        chance: 30
+    },
 
-    document.getElementById(screenName).classList.remove("hidden");
+    {
+        name: "Void Fox",
+        rarity: "Epic",
+        power: 40,
+        icon: "🦊",
+        chance: 15
+    },
 
-    if (screenName === "pets") {
-        updatePets();
+    {
+        name: "Void Dragon",
+        rarity: "Legendary",
+        power: 100,
+        icon: "🐉",
+        chance: 5
     }
-}
+
+];
 
 
-// ============================
-// CURRENCY
-// ============================
+/* =========================================================
+   GAME SETTINGS
+========================================================= */
 
-function updateCurrencies() {
-
-    document.getElementById("coins").textContent = coins;
-    document.getElementById("diamonds").textContent = diamonds;
-
-}
+const EGG_COST = 100;
 
 
-// ============================
-// EGG SYSTEM
-// ============================
+/* =========================================================
+   LOAD SAVE
+========================================================= */
 
-function hatchEgg() {
+function loadGame() {
 
-    const eggCost = 100;
+    const savedData =
+        localStorage.getItem("voidPetsOnlineSave");
 
-    if (coins < eggCost) {
 
-        alert("Not enough Coins!");
+    if (!savedData) {
+
+        saveGame();
 
         return;
     }
 
-    coins -= eggCost;
 
-    updateCurrencies();
+    try {
 
-
-    // RANDOM PET
-
-    const random = Math.random();
-
-    let pet;
+        const data =
+            JSON.parse(savedData);
 
 
-    if (random < 0.50) {
+        if (data.coins !== undefined) {
 
-        pet = {
-            name: "Void Cat",
-            rarity: "Common",
-            power: 5
-        };
+            player.coins = data.coins;
 
-    } else if (random < 0.80) {
+        }
 
-        pet = {
-            name: "Void Dog",
-            rarity: "Rare",
-            power: 15
-        };
 
-    } else if (random < 0.95) {
+        if (data.diamonds !== undefined) {
 
-        pet = {
-            name: "Void Fox",
-            rarity: "Epic",
-            power: 40
-        };
+            player.diamonds = data.diamonds;
 
-    } else {
+        }
 
-        pet = {
-            name: "Void Dragon",
-            rarity: "Legendary",
-            power: 100
-        };
+
+        if (Array.isArray(data.pets)) {
+
+            player.pets = data.pets;
+
+        }
+
+
+        if (data.clan !== undefined) {
+
+            player.clan = data.clan;
+
+        }
 
     }
 
+    catch (error) {
 
-    pets.push(pet);
+        console.error(
+            "Save data could not be loaded.",
+            error
+        );
 
-
-    const result = document.getElementById("result");
-
-    result.classList.remove("hidden");
-
-    result.innerHTML = `
-        🎉 You hatched a pet!<br><br>
-
-        🐾 <strong>${pet.name}</strong><br>
-
-        ⭐ ${pet.rarity}<br>
-
-        ⚡ Power: ${pet.power}
-    `;
+    }
 
 }
 
 
-// ============================
-// PETS
-// ============================
+/* =========================================================
+   SAVE GAME
+========================================================= */
+
+function saveGame() {
+
+    localStorage.setItem(
+
+        "voidPetsOnlineSave",
+
+        JSON.stringify(player)
+
+    );
+
+}
+
+
+/* =========================================================
+   RAP
+========================================================= */
+
+function getRAP() {
+
+    let totalRAP = 0;
+
+
+    player.pets.forEach(pet => {
+
+        totalRAP += pet.power;
+
+    });
+
+
+    return totalRAP;
+
+}
+
+
+/* =========================================================
+   UI UPDATE
+========================================================= */
+
+function updateCurrencies() {
+
+    document.getElementById(
+        "coins"
+    ).textContent =
+        formatNumber(player.coins);
+
+
+    document.getElementById(
+        "diamonds"
+    ).textContent =
+        formatNumber(player.diamonds);
+
+
+    document.getElementById(
+        "rap"
+    ).textContent =
+        formatNumber(getRAP());
+
+
+    document.getElementById(
+        "weekly-player"
+    ).textContent =
+        formatNumber(player.diamonds)
+        + " 💎";
+
+
+    document.getElementById(
+        "monthly-player"
+    ).textContent =
+        formatNumber(getRAP())
+        + " RAP";
+
+
+    document.getElementById(
+        "pet-count"
+    ).textContent =
+        player.pets.length;
+
+}
+
+
+/* =========================================================
+   NUMBER FORMAT
+========================================================= */
+
+function formatNumber(number) {
+
+    return number.toLocaleString(
+        "en-US"
+    );
+
+}
+
+
+/* =========================================================
+   SCREEN SYSTEM
+========================================================= */
+
+function showScreen(screenName) {
+
+    const screens =
+        document.querySelectorAll(".screen");
+
+
+    screens.forEach(screen => {
+
+        screen.classList.add("hidden");
+
+    });
+
+
+    const target =
+        document.getElementById(screenName);
+
+
+    if (target) {
+
+        target.classList.remove("hidden");
+
+    }
+
+
+    if (screenName === "pets") {
+
+        updatePets();
+
+    }
+
+
+    if (screenName === "leaderboards") {
+
+        updateLeaderboards();
+
+    }
+
+
+    if (screenName === "clans") {
+
+        updateClan();
+
+    }
+
+}
+
+
+/* =========================================================
+   RANDOM PET
+========================================================= */
+
+function getRandomPet() {
+
+    const random =
+        Math.random() * 100;
+
+
+    let current = 0;
+
+
+    for (const pet of PETS) {
+
+        current += pet.chance;
+
+
+        if (random <= current) {
+
+            return {
+
+                name: pet.name,
+
+                rarity: pet.rarity,
+
+                power: pet.power,
+
+                icon: pet.icon
+
+            };
+
+        }
+
+    }
+
+
+    return {
+
+        name: PETS[0].name,
+
+        rarity: PETS[0].rarity,
+
+        power: PETS[0].power,
+
+        icon: PETS[0].icon
+
+    };
+
+}
+
+
+/* =========================================================
+   HATCH EGG
+========================================================= */
+
+function hatchEgg() {
+
+    if (player.coins < EGG_COST) {
+
+        alert(
+            "You don't have enough Coins!"
+        );
+
+        return;
+    }
+
+
+    player.coins -= EGG_COST;
+
+
+    const egg =
+        document.getElementById(
+            "egg-image"
+        );
+
+
+    const button =
+        document.getElementById(
+            "hatch-button"
+        );
+
+
+    const result =
+        document.getElementById(
+            "result"
+        );
+
+
+    button.disabled = true;
+
+
+    egg.classList.add(
+        "hatching"
+    );
+
+
+    result.classList.add(
+        "hidden"
+    );
+
+
+    setTimeout(() => {
+
+        const pet =
+            getRandomPet();
+
+
+        player.pets.push(pet);
+
+
+        egg.classList.remove(
+            "hatching"
+        );
+
+
+        result.classList.remove(
+            "hidden"
+        );
+
+
+        result.innerHTML = `
+
+            <div style="font-size:70px">
+                ${pet.icon}
+            </div>
+
+            <strong>
+                You hatched a ${pet.name}!
+            </strong>
+
+            <br><br>
+
+            ⭐ Rarity:
+            ${pet.rarity}
+
+            <br>
+
+            ⚡ Power:
+            ${pet.power}
+
+            <br><br>
+
+            📊 Your RAP:
+            ${formatNumber(getRAP())}
+
+        `;
+
+
+        button.disabled = false;
+
+
+        updateCurrencies();
+
+        saveGame();
+
+
+    }, 1000);
+
+}
+
+
+/* =========================================================
+   PET LIST
+========================================================= */
 
 function updatePets() {
 
-    const list = document.getElementById("pet-list");
+    const list =
+        document.getElementById(
+            "pet-list"
+        );
 
-    if (pets.length === 0) {
+
+    if (player.pets.length === 0) {
 
         list.innerHTML = `
-            <p>You don't have any pets yet.</p>
+
+            <p>
+                You don't have any pets yet.
+                Go hatch an egg!
+            </p>
+
         `;
 
         return;
@@ -139,27 +474,227 @@ function updatePets() {
     list.innerHTML = "";
 
 
-    pets.forEach((pet, index) => {
+    player.pets.forEach(
+        (pet, index) => {
 
-        const element = document.createElement("div");
+            const element =
+                document.createElement(
+                    "div"
+                );
 
-        element.className = "pet";
 
-        element.innerHTML = `
-            🐾 <strong>${pet.name}</strong><br>
-            ⭐ ${pet.rarity}<br>
-            ⚡ Power: ${pet.power}
-        `;
+            element.className =
+                "pet";
 
-        list.appendChild(element);
 
-    });
+            element.innerHTML = `
+
+                <div class="pet-icon">
+                    ${pet.icon}
+                </div>
+
+                <div class="pet-name">
+                    ${pet.name}
+                </div>
+
+                <div class="pet-rarity">
+                    ⭐ ${pet.rarity}
+                </div>
+
+                <div class="pet-power">
+                    ⚡ Power:
+                    ${pet.power}
+                </div>
+
+            `;
+
+
+            list.appendChild(
+                element
+            );
+
+        }
+    );
 
 }
 
 
-// ============================
-// START
-// ============================
+/* =========================================================
+   LEADERBOARDS
+========================================================= */
+
+function updateLeaderboards() {
+
+    document.getElementById(
+        "weekly-player"
+    ).textContent =
+
+        formatNumber(
+            player.diamonds
+        )
+        + " 💎";
+
+
+    document.getElementById(
+        "monthly-player"
+    ).textContent =
+
+        formatNumber(
+            getRAP()
+        )
+        + " RAP";
+
+}
+
+
+/* =========================================================
+   PASSIVE INCOME
+========================================================= */
+
+/*
+
+    The player receives Coins automatically.
+
+    Current rate:
+    +1 Coin every second.
+
+*/
+
+setInterval(() => {
+
+    player.coins += 1;
+
+    updateCurrencies();
+
+    saveGame();
+
+}, 1000);
+
+
+/* =========================================================
+   CLANS
+========================================================= */
+
+function createClan() {
+
+    if (player.clan) {
+
+        alert(
+            "You already have a clan!"
+        );
+
+        return;
+    }
+
+
+    const clanName =
+        prompt(
+            "Enter your clan name:"
+        );
+
+
+    if (!clanName) {
+
+        return;
+    }
+
+
+    player.clan = {
+
+        name: clanName,
+
+        members: 1,
+
+        racePoints: 0
+
+    };
+
+
+    saveGame();
+
+    updateClan();
+
+}
+
+
+function updateClan() {
+
+    const info =
+        document.getElementById(
+            "clan-info"
+        );
+
+
+    if (!player.clan) {
+
+        info.classList.add(
+            "hidden"
+        );
+
+        return;
+    }
+
+
+    info.classList.remove(
+        "hidden"
+    );
+
+
+    info.innerHTML = `
+
+        <h3>
+            🛡️ ${player.clan.name}
+        </h3>
+
+        <p>
+            Members:
+            ${player.clan.members}
+        </p>
+
+        <p>
+            🏁 Race Points:
+            ${player.clan.racePoints}
+        </p>
+
+    `;
+
+}
+
+
+/* =========================================================
+   RESET GAME
+========================================================= */
+
+function resetGame() {
+
+    const confirmReset =
+        confirm(
+            "Are you sure you want to delete your save?"
+        );
+
+
+    if (!confirmReset) {
+
+        return;
+    }
+
+
+    localStorage.removeItem(
+        "voidPetsOnlineSave"
+    );
+
+
+    location.reload();
+
+}
+
+
+/* =========================================================
+   START GAME
+========================================================= */
+
+loadGame();
 
 updateCurrencies();
+
+updatePets();
