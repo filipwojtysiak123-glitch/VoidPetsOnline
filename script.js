@@ -1,6 +1,6 @@
 /* =========================================
    VOID PETS ONLINE
-   VERSION 0.1
+   VERSION 0.3
 ========================================= */
 
 
@@ -8,39 +8,87 @@
    PET DEFINITIONS
 ========================================= */
 
-const PETS = {// =========================
-// PET VARIANTS
-// =========================
+const PETS = {
 
-const PET_VARIANTS = {
-    normal: {
-        name: "Normal",
-        multiplier: 1,
-        chance: 94.44,
-        emoji: ""
+    void_cat: {
+        name: "Void Cat",
+        rarity: "Common",
+        chance: 50,
+        power: 5,
+        icon: "🐱"
     },
 
-    shiny: {
-        name: "Shiny",
-        multiplier: 2,
+    void_dog: {
+        name: "Void Dog",
+        rarity: "Uncommon",
+        chance: 30,
+        power: 10,
+        icon: "🐶"
+    },
+
+    void_bat: {
+        name: "Void Bat",
+        rarity: "Rare",
+        chance: 15,
+        power: 20,
+        icon: "🦇"
+    },
+
+    void_dragon: {
+        name: "Void Dragon",
+        rarity: "Legendary",
         chance: 5,
-        emoji: "✨"
+        power: 50,
+        icon: "🐉"
+    }
+
+};
+
+
+/* =========================================
+   MATERIAL VARIANTS
+========================================= */
+
+const PET_VARIANTS = {
+
+    normal: {
+        name: "Normal",
+        multiplier: 1
     },
 
     gold: {
         name: "Gold",
-        multiplier: 5,
-        chance: 0.5,
-        emoji: "🟡"
+        multiplier: 5
     },
 
     rainbow: {
         name: "Rainbow",
-        multiplier: 10,
-        chance: 0.05,
-        emoji: "🌈"
+        multiplier: 10
     }
+
 };
+
+
+/* =========================================
+   SPECIAL CHANCES
+========================================= */
+
+const SHINY_CHANCE = 5;
+
+const HUGE_CHANCE = 0.01;
+
+const SECRET_CHANCE = 0.001;
+
+
+/* =========================================
+   SPECIAL MULTIPLIERS
+========================================= */
+
+const SHINY_MULTIPLIER = 2;
+
+const HUGE_MULTIPLIER = 25;
+
+const SECRET_MULTIPLIER = 100;
 
 
 /* =========================================
@@ -107,56 +155,125 @@ function loadGame() {
             "voidPetsSave"
         );
 
+
     if (!saved) {
 
         return {
             ...DEFAULT_SAVE,
             lastSave: Date.now()
         };
+
     }
+
 
     try {
 
         const parsed =
             JSON.parse(saved);
 
+
         const loaded = {
             ...DEFAULT_SAVE,
             ...parsed
         };
 
+
+        if (
+            !Array.isArray(
+                loaded.inventory
+            )
+        ) {
+
+            loaded.inventory = [];
+
+        }
+
+
+        if (
+            !Array.isArray(
+                loaded.equipped
+            )
+        ) {
+
+            loaded.equipped = [];
+
+        }
+
+
+        if (
+            !Array.isArray(
+                loaded.unlockedWorlds
+            )
+        ) {
+
+            loaded.unlockedWorlds = [
+                "void"
+            ];
+
+        }
+
+
+        loaded.equipped =
+            loaded.equipped.filter(
+                id =>
+                    loaded.inventory.some(
+                        pet =>
+                            pet.id === id
+                    )
+            );
+
+
         /*
-            Offline earnings
+            OFFLINE EARNINGS
         */
 
-        const now = Date.now();
+        const now =
+            Date.now();
+
 
         const elapsed =
-            now - loaded.lastSave;
+            now -
+            (
+                loaded.lastSave ||
+                now
+            );
+
 
         const maxOffline =
-            8 * 60 * 60 * 1000;
+            8 *
+            60 *
+            60 *
+            1000;
+
 
         const offlineTime =
             Math.min(
-                elapsed,
+                Math.max(
+                    elapsed,
+                    0
+                ),
                 maxOffline
             );
+
 
         const seconds =
             Math.floor(
                 offlineTime / 1000
             );
 
+
         const power =
             getEquippedPower(
                 loaded
             );
 
+
         const world =
             WORLDS[
                 loaded.currentWorld
-            ] || WORLDS.void;
+            ] ||
+            WORLDS.void;
+
 
         const offlineCoins =
             Math.floor(
@@ -165,26 +282,36 @@ function loadGame() {
                 seconds
             );
 
-        if (offlineCoins > 0) {
+
+        if (
+            offlineCoins > 0
+        ) {
 
             loaded.coins +=
                 offlineCoins;
 
-            setTimeout(() => {
 
-                showToast(
-                    `Offline earnings: +${formatNumber(offlineCoins)} Coins`,
-                    "success"
-                );
+            setTimeout(
+                () => {
 
-            }, 500);
+                    showToast(
+                        `Offline earnings: +${formatNumber(offlineCoins)} Coins`,
+                        "success"
+                    );
+
+                },
+                500
+            );
 
         }
+
 
         loaded.lastSave =
             now;
 
+
         return loaded;
+
 
     } catch (error) {
 
@@ -193,11 +320,14 @@ function loadGame() {
             error
         );
 
+
         return {
             ...DEFAULT_SAVE,
             lastSave: Date.now()
         };
+
     }
+
 }
 
 
@@ -210,10 +340,12 @@ function saveGame() {
     game.lastSave =
         Date.now();
 
+
     localStorage.setItem(
         "voidPetsSave",
         JSON.stringify(game)
     );
+
 }
 
 
@@ -221,10 +353,57 @@ function saveGame() {
    FORMAT NUMBERS
 ========================================= */
 
-function formatNumber(number) {
+function formatNumber(
+    number
+) {
 
-    return Math.floor(number)
-        .toLocaleString("en-US");
+    return Math.floor(
+        Number(number) || 0
+    ).toLocaleString(
+        "en-US"
+    );
+
+}
+
+
+/* =========================================
+   GET PET POWER
+========================================= */
+
+function getPetPower(
+    pet
+) {
+
+    if (!pet) {
+
+        return 0;
+
+    }
+
+
+    if (
+        typeof pet.power ===
+        "number"
+    ) {
+
+        return pet.power;
+
+    }
+
+
+    const definition =
+        PETS[pet.type];
+
+
+    if (!definition) {
+
+        return 0;
+
+    }
+
+
+    return definition.power;
+
 }
 
 
@@ -238,27 +417,50 @@ function getEquippedPower(
 
     let total = 0;
 
+
+    if (
+        !Array.isArray(
+            state.equipped
+        ) ||
+        !Array.isArray(
+            state.inventory
+        )
+    ) {
+
+        return 0;
+
+    }
+
+
     state.equipped.forEach(
         petId => {
 
             const pet =
                 state.inventory.find(
-                    p => p.id === petId
+                    p =>
+                        p.id ===
+                        petId
                 );
 
-            if (!pet) return;
 
-            const definition =
-                PETS[pet.type];
+            if (!pet) {
 
-            if (!definition) return;
+                return;
+
+            }
+
 
             total +=
-                definition.power;
+                getPetPower(
+                    pet
+                );
+
         }
     );
 
+
     return total;
+
 }
 
 
@@ -273,9 +475,11 @@ function getWorldMultiplier() {
             game.currentWorld
         ];
 
+
     return world
         ? world.multiplier
         : 1;
+
 }
 
 
@@ -289,6 +493,7 @@ function getPassiveIncome() {
         getEquippedPower() *
         getWorldMultiplier()
     );
+
 }
 
 
@@ -296,26 +501,37 @@ function getPassiveIncome() {
    PASSIVE LOOP
 ========================================= */
 
-setInterval(() => {
+setInterval(
+    () => {
 
-    const income =
-        getPassiveIncome();
+        const income =
+            getPassiveIncome();
 
-    if (income <= 0) {
-        return;
-    }
 
-    game.coins += income;
+        if (
+            income <= 0
+        ) {
 
-    saveGame();
+            return;
 
-    updateUI();
+        }
 
-}, 1000);
+
+        game.coins +=
+            income;
+
+
+        saveGame();
+
+        updateUI();
+
+    },
+    1000
+);
 
 
 /* =========================================
-   PAGE SYSTEM
+   PAGE DATA
 ========================================= */
 
 const PAGE_DATA = {
@@ -373,16 +589,27 @@ const PAGE_DATA = {
 };
 
 
-function showPage(pageName) {
+/* =========================================
+   SHOW PAGE
+========================================= */
+
+function showPage(
+    pageName
+) {
 
     document
-        .querySelectorAll(".page")
-        .forEach(page => {
+        .querySelectorAll(
+            ".page"
+        )
+        .forEach(
+            page => {
 
-            page.classList.remove(
-                "active"
-            );
-        });
+                page.classList.remove(
+                    "active"
+                );
+
+            }
+        );
 
 
     const target =
@@ -390,7 +617,13 @@ function showPage(pageName) {
             `page-${pageName}`
         );
 
-    if (!target) return;
+
+    if (!target) {
+
+        return;
+
+    }
+
 
     target.classList.add(
         "active"
@@ -398,54 +631,87 @@ function showPage(pageName) {
 
 
     document
-        .querySelectorAll(".nav-btn")
-        .forEach(button => {
+        .querySelectorAll(
+            ".nav-btn"
+        )
+        .forEach(
+            button => {
 
-            button.classList.remove(
-                "active"
-            );
-
-            if (
-                button.dataset.page ===
-                pageName
-            ) {
-
-                button.classList.add(
+                button.classList.remove(
                     "active"
                 );
+
+
+                if (
+                    button.dataset.page ===
+                    pageName
+                ) {
+
+                    button.classList.add(
+                        "active"
+                    );
+
+                }
+
             }
-        });
+        );
 
 
     const data =
-        PAGE_DATA[pageName];
+        PAGE_DATA[
+            pageName
+        ];
+
 
     if (data) {
 
-        document.getElementById(
-            "page-title"
-        ).textContent =
-            data.title;
+        const title =
+            document.getElementById(
+                "page-title"
+            );
 
-        document.getElementById(
-            "page-subtitle"
-        ).textContent =
-            data.subtitle;
+
+        const subtitle =
+            document.getElementById(
+                "page-subtitle"
+            );
+
+
+        if (title) {
+
+            title.textContent =
+                data.title;
+
+        }
+
+
+        if (subtitle) {
+
+            subtitle.textContent =
+                data.subtitle;
+
+        }
+
     }
 
 
     renderAll();
 
 
-    /*
-        Close mobile sidebar
-    */
+    const sidebar =
+        document.querySelector(
+            ".sidebar"
+        );
 
-    document
-        .querySelector(".sidebar")
-        .classList.remove(
+
+    if (sidebar) {
+
+        sidebar.classList.remove(
             "open"
         );
+
+    }
+
 }
 
 
@@ -454,76 +720,76 @@ function showPage(pageName) {
 ========================================= */
 
 document
-    .querySelectorAll(".nav-btn")
-    .forEach(button => {
+    .querySelectorAll(
+        ".nav-btn"
+    )
+    .forEach(
+        button => {
 
-        button.addEventListener(
-            "click",
-            () => {
+            button.addEventListener(
+                "click",
+                () => {
 
-                showPage(
-                    button.dataset.page
-                );
+                    showPage(
+                        button.dataset.page
+                    );
 
-            }
-        );
-
-    });
-
-
-/* =========================================
-   MOBILE MENU
-========================================= */
-
-document
-    .getElementById("mobile-menu")
-    .addEventListener(
-        "click",
-        () => {
-
-            document
-                .querySelector(".sidebar")
-                .classList.toggle(
-                    "open"
-                );
+                }
+            );
 
         }
     );
 
 
 /* =========================================
-   HATCH EGG
+   MOBILE MENU
 ========================================= */
 
-function hatchBasicEgg() {
-
-    const price = 100;
-
-    if (game.coins < price) {
-
-        showToast(
-            "You don't have enough Coins.",
-            "error"
-        );
-
-        return;
-    }
+const mobileMenu =
+    document.getElementById(
+        "mobile-menu"
+    );
 
 
-    game.coins -= price;
+if (mobileMenu) {
+
+    mobileMenu.addEventListener(
+        "click",
+        () => {
+
+            const sidebar =
+                document.querySelector(
+                    ".sidebar"
+                );
 
 
-    /*
-        Weighted RNG
-    */
+            if (sidebar) {
+
+                sidebar.classList.toggle(
+                    "open"
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   ROLL BASE PET
+========================================= */
+
+function rollBasePet() {
 
     const random =
-        Math.random() * 100;
+        Math.random() *
+        100;
 
-    let cumulative = 0;
 
-    let selectedType =
-        "void_cat";
+    let cumulative =
+        0;
 
 
     for (
@@ -533,41 +799,449 @@ function hatchBasicEgg() {
         cumulative +=
             PETS[type].chance;
 
+
         if (
-            random <= cumulative
+            random <=
+            cumulative
         ) {
 
-            selectedType =
-                type;
+            return type;
 
-            break;
         }
+
+    }
+
+
+    return "void_cat";
+
+}
+
+
+/* =========================================
+   ROLL GOLD / RAINBOW
+========================================= */
+
+function rollMaterialVariant() {
+
+    const random =
+        Math.random() *
+        100;
+
+
+    /*
+        Rainbow = 0.05%
+        Gold    = 0.50%
+        Normal  = 99.45%
+    */
+
+    if (
+        random <
+        0.05
+    ) {
+
+        return PET_VARIANTS.rainbow;
+
+    }
+
+
+    if (
+        random <
+        0.55
+    ) {
+
+        return PET_VARIANTS.gold;
+
+    }
+
+
+    return PET_VARIANTS.normal;
+
+}
+
+
+/* =========================================
+   ROLL SHINY
+========================================= */
+
+function rollShiny() {
+
+    return (
+        Math.random() *
+        100
+    ) <
+    SHINY_CHANCE;
+
+}
+
+
+/* =========================================
+   ROLL HUGE
+========================================= */
+
+function rollHuge() {
+
+    return (
+        Math.random() *
+        100
+    ) <
+    HUGE_CHANCE;
+
+}
+
+
+/* =========================================
+   ROLL SECRET
+========================================= */
+
+function rollSecret() {
+
+    return (
+        Math.random() *
+        100
+    ) <
+    SECRET_CHANCE;
+
+}
+
+
+/* =========================================
+   CREATE HATCHED PET
+========================================= */
+
+function createHatchedPet(
+    type
+) {
+
+    const definition =
+        PETS[type];
+
+
+    /*
+        EVERY VARIANT IS ROLLED
+        SEPARATELY.
+
+        This means:
+
+        Gold + Shiny
+        Rainbow + Shiny
+        Huge + Shiny
+        Secret + Shiny
+        etc.
+
+        CAN ALL HAPPEN.
+    */
+
+    const material =
+        rollMaterialVariant();
+
+
+    const shiny =
+        rollShiny();
+
+
+    const huge =
+        rollHuge();
+
+
+    const secret =
+        rollSecret();
+
+
+    /*
+        START WITH GOLD / RAINBOW
+        MULTIPLIER.
+    */
+
+    let multiplier =
+        material.multiplier;
+
+
+    /*
+        SHINY STACKS WITH EVERYTHING.
+    */
+
+    if (shiny) {
+
+        multiplier *=
+            SHINY_MULTIPLIER;
+
     }
 
 
     /*
-        Unique pet ID
+        HUGE STACKS WITH EVERYTHING.
     */
 
-    const pet = {
+    if (huge) {
+
+        multiplier *=
+            HUGE_MULTIPLIER;
+
+    }
+
+
+    /*
+        SECRET STACKS WITH EVERYTHING.
+
+        Secret is the strongest
+        special variant.
+    */
+
+    if (secret) {
+
+        multiplier *=
+            SECRET_MULTIPLIER;
+
+    }
+
+
+    /*
+        FINAL POWER
+    */
+
+    const power =
+        Math.floor(
+            definition.power *
+            multiplier
+        );
+
+
+    /* =====================================
+       BUILD VARIANT NAME
+    ===================================== */
+
+    const variantParts = [];
+
+
+    if (secret) {
+
+        variantParts.push(
+            "Secret"
+        );
+
+    }
+
+
+    if (huge) {
+
+        variantParts.push(
+            "Huge"
+        );
+
+    }
+
+
+    if (
+        material.name !==
+        "Normal"
+    ) {
+
+        variantParts.push(
+            material.name
+        );
+
+    }
+
+
+    if (shiny) {
+
+        variantParts.push(
+            "Shiny"
+        );
+
+    }
+
+
+    const variantName =
+        variantParts.length > 0
+            ? variantParts.join(" ")
+            : "Normal";
+
+
+    /* =====================================
+       BUILD VARIANT EMOJIS
+    ===================================== */
+
+    const variantEmojis = [];
+
+
+    if (secret) {
+
+        variantEmojis.push(
+            "❓"
+        );
+
+    }
+
+
+    if (huge) {
+
+        variantEmojis.push(
+            "🟣"
+        );
+
+    }
+
+
+    if (
+        material.name ===
+        "Gold"
+    ) {
+
+        variantEmojis.push(
+            "🟡"
+        );
+
+    }
+
+
+    if (
+        material.name ===
+        "Rainbow"
+    ) {
+
+        variantEmojis.push(
+            "🌈"
+        );
+
+    }
+
+
+    if (shiny) {
+
+        variantEmojis.push(
+            "✨"
+        );
+
+    }
+
+
+    const variantEmoji =
+        variantEmojis.join(
+            " "
+        );
+
+
+    /* =====================================
+       RETURN PET
+    ===================================== */
+
+    return {
 
         id:
-            `${selectedType}_${Date.now()}_${Math.random()
+            `${type}_${Date.now()}_${Math.random()
                 .toString(36)
-                .substring(2, 8)}`,
+                .substring(2, 10)}`,
 
         type:
-            selectedType,
+            type,
 
         obtainedAt:
-            Date.now()
+            Date.now(),
+
+
+        /*
+            MATERIAL
+        */
+
+        variant:
+            material.name.toLowerCase(),
+
+
+        /*
+            FULL VARIANT NAME
+        */
+
+        variantName:
+            variantName,
+
+
+        /*
+            EMOJIS
+        */
+
+        variantEmoji:
+            variantEmoji,
+
+
+        /*
+            SPECIAL FLAGS
+        */
+
+        shiny:
+            shiny,
+
+        huge:
+            huge,
+
+        secret:
+            secret,
+
+
+        /*
+            POWER
+        */
+
+        basePower:
+            definition.power,
+
+        variantMultiplier:
+            multiplier,
+
+        power:
+            power
 
     };
+
+}
+
+
+/* =========================================
+   HATCH BASIC EGG
+========================================= */
+
+function hatchBasicEgg() {
+
+    const price =
+        100;
+
+
+    if (
+        game.coins <
+        price
+    ) {
+
+        showToast(
+            "You don't have enough Coins.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    game.coins -=
+        price;
+
+
+    const selectedType =
+        rollBasePet();
+
+
+    const pet =
+        createHatchedPet(
+            selectedType
+        );
 
 
     game.inventory.push(
         pet
     );
+
+
+    selectedPetId =
+        pet.id;
 
 
     saveGame();
@@ -576,29 +1250,30 @@ function hatchBasicEgg() {
 
 
     const definition =
-        PETS[selectedType];
+        PETS[
+            selectedType
+        ];
+
+
+    const variantText =
+        pet.variantName ===
+        "Normal"
+
+            ? ""
+
+            : `${pet.variantEmoji} ${pet.variantName} `;
 
 
     showToast(
-        `You hatched ${definition.name}!`,
+        `You hatched ${variantText}${definition.name}!`,
         "success"
     );
-
-
-    /*
-        Show pet details
-    */
-
-    selectedPetId =
-        pet.id;
-
-    showPage("pets");
 
 }
 
 
 /* =========================================
-   RENDER PET LIST
+   RENDER PETS
 ========================================= */
 
 function renderPetsList() {
@@ -608,23 +1283,37 @@ function renderPetsList() {
             "pets-list"
         );
 
-    if (!container) return;
 
-    container.innerHTML = "";
+    if (!container) {
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        "";
 
 
     if (
-        game.inventory.length === 0
+        game.inventory.length ===
+        0
     ) {
 
         container.innerHTML = `
 
-            <div class="panel empty-state"
-                 style="grid-column:1/-1">
+            <div
+                class="panel empty-state"
+                style="grid-column:1/-1"
+            >
 
-                <div>🥚</div>
+                <div>
+                    🥚
+                </div>
 
-                <h3>No Pets Yet</h3>
+                <h3>
+                    No Pets Yet
+                </h3>
 
                 <p>
                     Hatch an egg to get your first pet.
@@ -634,19 +1323,20 @@ function renderPetsList() {
 
                 <button
                     class="btn primary"
-                    onclick="showPage('eggs')">
-
+                    onclick="showPage('eggs')"
+                >
                     Go to Eggs
-
                 </button>
 
             </div>
 
         `;
 
+
         renderPetDetails();
 
         return;
+
     }
 
 
@@ -654,9 +1344,16 @@ function renderPetsList() {
         pet => {
 
             const definition =
-                PETS[pet.type];
+                PETS[
+                    pet.type
+                ];
 
-            if (!definition) return;
+
+            if (!definition) {
+
+                return;
+
+            }
 
 
             const equipped =
@@ -665,10 +1362,36 @@ function renderPetsList() {
                 );
 
 
+            const power =
+                getPetPower(
+                    pet
+                );
+
+
+            const variantName =
+                pet.variantName ||
+                "Normal";
+
+
+            const variantEmoji =
+                pet.variantEmoji ||
+                "";
+
+
+            const displayName =
+                variantName ===
+                "Normal"
+
+                    ? definition.name
+
+                    : `${variantName} ${definition.name}`;
+
+
             const card =
                 document.createElement(
                     "div"
                 );
+
 
             card.className =
                 "pet-card";
@@ -682,34 +1405,93 @@ function renderPetsList() {
                 card.classList.add(
                     "selected"
                 );
+
             }
 
 
             card.innerHTML = `
 
                 <div class="pet-visual">
+
                     ${definition.icon}
+
                 </div>
+
 
                 <h3>
-                    ${definition.name}
+
+                    ${variantEmoji}
+                    ${displayName}
+
                 </h3>
 
-                <div class="pet-rarity ${definition.rarity.toLowerCase()}">
+
+                ${
+                    variantName !==
+                    "Normal"
+
+                    ? `
+
+                        <div class="pet-variant">
+
+                            ${variantEmoji}
+                            ${variantName}
+
+                        </div>
+
+                    `
+
+                    : ""
+                }
+
+
+                <div
+                    class="pet-rarity ${definition.rarity.toLowerCase()}"
+                >
+
                     ${definition.rarity}
+
                 </div>
 
+
                 <div class="pet-power">
-                    Power: ${definition.power}
+
+                    Power:
+                    ${formatNumber(power)}
+
                 </div>
+
+
+                ${
+                    pet.secret
+
+                    ? `
+
+                        <div class="equipped-badge">
+
+                            SECRET
+
+                        </div>
+
+                    `
+
+                    : ""
+                }
+
 
                 ${
                     equipped
+
                     ? `
+
                         <div class="equipped-badge">
+
                             EQUIPPED
+
                         </div>
+
                     `
+
                     : ""
                 }
 
@@ -722,6 +1504,7 @@ function renderPetsList() {
 
                     selectedPetId =
                         pet.id;
+
 
                     renderAll();
 
@@ -738,6 +1521,7 @@ function renderPetsList() {
 
 
     renderPetDetails();
+
 }
 
 
@@ -752,12 +1536,19 @@ function renderPetDetails() {
             "pet-details"
         );
 
-    if (!container) return;
+
+    if (!container) {
+
+        return;
+
+    }
 
 
     const pet =
         game.inventory.find(
-            p => p.id === selectedPetId
+            p =>
+                p.id ===
+                selectedPetId
         );
 
 
@@ -767,9 +1558,13 @@ function renderPetDetails() {
 
             <div class="empty-state">
 
-                <div>🐾</div>
+                <div>
+                    🐾
+                </div>
 
-                <h3>Select a Pet</h3>
+                <h3>
+                    Select a Pet
+                </h3>
 
                 <p>
                     Select one of your pets to
@@ -781,11 +1576,21 @@ function renderPetDetails() {
         `;
 
         return;
+
     }
 
 
     const definition =
-        PETS[pet.type];
+        PETS[
+            pet.type
+        ];
+
+
+    if (!definition) {
+
+        return;
+
+    }
 
 
     const equipped =
@@ -794,69 +1599,254 @@ function renderPetDetails() {
         );
 
 
+    const power =
+        getPetPower(
+            pet
+        );
+
+
+    const variantName =
+        pet.variantName ||
+        "Normal";
+
+
+    const variantEmoji =
+        pet.variantEmoji ||
+        "";
+
+
+    const basePower =
+        pet.basePower ||
+        definition.power;
+
+
+    const displayName =
+        variantName ===
+        "Normal"
+
+            ? definition.name
+
+            : `${variantName} ${definition.name}`;
+
+
     container.innerHTML = `
 
         <div class="detail-visual">
+
             ${definition.icon}
+
         </div>
+
 
         <h2 class="detail-name">
-            ${definition.name}
+
+            ${variantEmoji}
+            ${displayName}
+
         </h2>
 
-        <div class="detail-rarity pet-rarity ${definition.rarity.toLowerCase()}">
+
+        <div
+            class="detail-rarity pet-rarity ${definition.rarity.toLowerCase()}"
+        >
+
             ${definition.rarity}
+
         </div>
+
+
+        ${
+            variantName !==
+            "Normal"
+
+            ? `
+
+                <div class="pet-variant detail-variant">
+
+                    ${variantEmoji}
+                    ${variantName}
+
+                </div>
+
+            `
+
+            : ""
+        }
+
 
         <div class="detail-stats">
 
-            <div class="detail-stat">
-                <span>Power</span>
-                <strong>
-                    ${definition.power}
-                </strong>
-            </div>
 
             <div class="detail-stat">
-                <span>Hatch Chance</span>
+
+                <span>
+                    Power
+                </span>
+
+                <strong>
+                    ${formatNumber(power)}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-stat">
+
+                <span>
+                    Base Power
+                </span>
+
+                <strong>
+                    ${formatNumber(basePower)}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-stat">
+
+                <span>
+                    Power Multiplier
+                </span>
+
+                <strong>
+                    ×${pet.variantMultiplier || 1}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-stat">
+
+                <span>
+                    Hatch Chance
+                </span>
+
                 <strong>
                     ${definition.chance}%
                 </strong>
+
             </div>
 
+
             <div class="detail-stat">
-                <span>Passive Income</span>
+
+                <span>
+                    Passive Income
+                </span>
+
                 <strong>
-                    ${definition.power}
+                    ${formatNumber(power)}
                     Coins/s
                 </strong>
+
             </div>
+
+
+            ${
+                pet.secret
+
+                ? `
+
+                    <div class="detail-stat">
+
+                        <span>
+                            Secret
+                        </span>
+
+                        <strong>
+                            YES
+                        </strong>
+
+                    </div>
+
+                `
+
+                : ""
+            }
+
+
+            ${
+                pet.huge
+
+                ? `
+
+                    <div class="detail-stat">
+
+                        <span>
+                            Huge
+                        </span>
+
+                        <strong>
+                            YES
+                        </strong>
+
+                    </div>
+
+                `
+
+                : ""
+            }
+
+
+            ${
+                pet.shiny
+
+                ? `
+
+                    <div class="detail-stat">
+
+                        <span>
+                            Shiny
+                        </span>
+
+                        <strong>
+                            YES
+                        </strong>
+
+                    </div>
+
+                `
+
+                : ""
+            }
+
 
         </div>
 
+
         ${
             equipped
+
             ? `
+
                 <button
                     class="btn danger full"
-                    onclick="unequipPet('${pet.id}')">
+                    onclick="unequipPet('${pet.id}')"
+                >
 
                     Unequip
 
                 </button>
+
             `
+
             : `
+
                 <button
                     class="btn primary full"
-                    onclick="equipPet('${pet.id}')">
+                    onclick="equipPet('${pet.id}')"
+                >
 
                     Equip
 
                 </button>
+
             `
         }
 
     `;
+
 }
 
 
@@ -875,10 +1865,12 @@ function equipPet(
     ) {
 
         return;
+
     }
 
 
-    const equipLimit = 3;
+    const equipLimit =
+        3;
 
 
     if (
@@ -892,16 +1884,23 @@ function equipPet(
         );
 
         return;
+
     }
 
 
     const exists =
         game.inventory.some(
-            pet => pet.id === petId
+            pet =>
+                pet.id ===
+                petId
         );
 
 
-    if (!exists) return;
+    if (!exists) {
+
+        return;
+
+    }
 
 
     game.equipped.push(
@@ -918,6 +1917,7 @@ function equipPet(
         "Pet equipped!",
         "success"
     );
+
 }
 
 
@@ -931,7 +1931,9 @@ function unequipPet(
 
     game.equipped =
         game.equipped.filter(
-            id => id !== petId
+            id =>
+                id !==
+                petId
         );
 
 
@@ -944,6 +1946,7 @@ function unequipPet(
         "Pet unequipped.",
         "success"
     );
+
 }
 
 
@@ -958,35 +1961,65 @@ function renderInventory() {
             "inventory-list"
         );
 
-    if (!container) return;
 
-    container.innerHTML = "";
+    if (!container) {
 
+        return;
 
-    document.getElementById(
-        "inventory-count"
-    ).textContent =
-        game.inventory.length;
+    }
 
 
-    document.getElementById(
-        "inventory-equipped"
-    ).textContent =
-        `${game.equipped.length} / 3`;
+    container.innerHTML =
+        "";
+
+
+    const count =
+        document.getElementById(
+            "inventory-count"
+        );
+
+
+    const equippedCount =
+        document.getElementById(
+            "inventory-equipped"
+        );
+
+
+    if (count) {
+
+        count.textContent =
+            game.inventory.length;
+
+    }
+
+
+    if (equippedCount) {
+
+        equippedCount.textContent =
+            `${game.equipped.length} / 3`;
+
+    }
 
 
     if (
-        game.inventory.length === 0
+        game.inventory.length ===
+        0
     ) {
 
         container.innerHTML = `
 
-            <div class="panel empty-state"
-                 style="grid-column:1/-1">
+            <div
+                class="panel empty-state"
+                style="grid-column:1/-1"
+            >
 
-                <div>🎒</div>
+                <div>
+                    🎒
+                </div>
 
-                <h3>Inventory Empty</h3>
+                <h3>
+                    Inventory Empty
+                </h3>
 
                 <p>
                     Your pets will appear here.
@@ -997,6 +2030,7 @@ function renderInventory() {
         `;
 
         return;
+
     }
 
 
@@ -1004,9 +2038,16 @@ function renderInventory() {
         pet => {
 
             const definition =
-                PETS[pet.type];
+                PETS[
+                    pet.type
+                ];
 
-            if (!definition) return;
+
+            if (!definition) {
+
+                return;
+
+            }
 
 
             const equipped =
@@ -1015,10 +2056,36 @@ function renderInventory() {
                 );
 
 
+            const power =
+                getPetPower(
+                    pet
+                );
+
+
+            const variantName =
+                pet.variantName ||
+                "Normal";
+
+
+            const variantEmoji =
+                pet.variantEmoji ||
+                "";
+
+
+            const displayName =
+                variantName ===
+                "Normal"
+
+                    ? definition.name
+
+                    : `${variantName} ${definition.name}`;
+
+
             const card =
                 document.createElement(
                     "div"
                 );
+
 
             card.className =
                 "pet-card";
@@ -1027,28 +2094,69 @@ function renderInventory() {
             card.innerHTML = `
 
                 <div class="pet-visual">
+
                     ${definition.icon}
+
                 </div>
+
 
                 <h3>
-                    ${definition.name}
+
+                    ${variantEmoji}
+                    ${displayName}
+
                 </h3>
 
-                <div class="pet-rarity ${definition.rarity.toLowerCase()}">
+
+                ${
+                    variantName !==
+                    "Normal"
+
+                    ? `
+
+                        <div class="pet-variant">
+
+                            ${variantEmoji}
+                            ${variantName}
+
+                        </div>
+
+                    `
+
+                    : ""
+                }
+
+
+                <div
+                    class="pet-rarity ${definition.rarity.toLowerCase()}"
+                >
+
                     ${definition.rarity}
+
                 </div>
 
+
                 <div class="pet-power">
-                    Power: ${definition.power}
+
+                    Power:
+                    ${formatNumber(power)}
+
                 </div>
+
 
                 ${
                     equipped
+
                     ? `
+
                         <div class="equipped-badge">
+
                             EQUIPPED
+
                         </div>
+
                     `
+
                     : ""
                 }
 
@@ -1062,7 +2170,10 @@ function renderInventory() {
                     selectedPetId =
                         pet.id;
 
-                    showPage("pets");
+
+                    showPage(
+                        "pets"
+                    );
 
                 }
             );
@@ -1074,11 +2185,12 @@ function renderInventory() {
 
         }
     );
+
 }
 
 
 /* =========================================
-   SIDE EQUIPPED PETS
+   EQUIPPED SIDE
 ========================================= */
 
 function renderEquippedSide() {
@@ -1088,13 +2200,21 @@ function renderEquippedSide() {
             "equipped-side-list"
         );
 
-    if (!container) return;
 
-    container.innerHTML = "";
+    if (!container) {
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        "";
 
 
     if (
-        game.equipped.length === 0
+        game.equipped.length ===
+        0
     ) {
 
         container.innerHTML = `
@@ -1110,6 +2230,7 @@ function renderEquippedSide() {
         `;
 
         return;
+
     }
 
 
@@ -1118,20 +2239,62 @@ function renderEquippedSide() {
 
             const pet =
                 game.inventory.find(
-                    p => p.id === petId
+                    p =>
+                        p.id ===
+                        petId
                 );
 
-            if (!pet) return;
+
+            if (!pet) {
+
+                return;
+
+            }
 
 
             const definition =
-                PETS[pet.type];
+                PETS[
+                    pet.type
+                ];
+
+
+            if (!definition) {
+
+                return;
+
+            }
+
+
+            const power =
+                getPetPower(
+                    pet
+                );
+
+
+            const variantName =
+                pet.variantName ||
+                "Normal";
+
+
+            const variantEmoji =
+                pet.variantEmoji ||
+                "";
+
+
+            const displayName =
+                variantName ===
+                "Normal"
+
+                    ? definition.name
+
+                    : `${variantName} ${definition.name}`;
 
 
             const element =
                 document.createElement(
                     "div"
                 );
+
 
             element.className =
                 "side-pet";
@@ -1140,15 +2303,24 @@ function renderEquippedSide() {
             element.innerHTML = `
 
                 <span class="side-pet-icon">
+
                     ${definition.icon}
+
                 </span>
+
 
                 <span>
-                    ${definition.name}
+
+                    ${variantEmoji}
+                    ${displayName}
+
                 </span>
 
+
                 <span class="side-pet-power">
-                    ${definition.power}
+
+                    ${formatNumber(power)}
+
                 </span>
 
             `;
@@ -1160,6 +2332,7 @@ function renderEquippedSide() {
 
         }
     );
+
 }
 
 
@@ -1167,14 +2340,190 @@ function renderEquippedSide() {
    WORLDS
 ========================================= */
 
+function renderWorlds() {
+
+    const cards =
+        document.querySelectorAll(
+            ".world-card"
+        );
+
+
+    if (
+        !cards.length
+    ) {
+
+        return;
+
+    }
+
+
+    cards.forEach(
+        card => {
+
+            const button =
+                card.querySelector(
+                    "button"
+                );
+
+
+            const status =
+                card.querySelector(
+                    ".world-status"
+                );
+
+
+            if (!button) {
+
+                return;
+
+            }
+
+
+            const text =
+                card.textContent
+                    .toLowerCase();
+
+
+            let worldId =
+                null;
+
+
+            if (
+                text.includes(
+                    "void forest"
+                )
+            ) {
+
+                worldId =
+                    "forest";
+
+            }
+
+
+            if (
+                text.includes(
+                    "void"
+                ) &&
+                !text.includes(
+                    "forest"
+                )
+            ) {
+
+                worldId =
+                    "void";
+
+            }
+
+
+            if (!worldId) {
+
+                return;
+
+            }
+
+
+            const unlocked =
+                game.unlockedWorlds.includes(
+                    worldId
+                );
+
+
+            const isCurrent =
+                game.currentWorld ===
+                worldId;
+
+
+            if (status) {
+
+                if (isCurrent) {
+
+                    status.textContent =
+                        "CURRENT WORLD";
+
+                } else if (unlocked) {
+
+                    status.textContent =
+                        "UNLOCKED";
+
+                } else {
+
+                    status.textContent =
+                        `${formatNumber(
+                            WORLDS[worldId].cost
+                        )} COINS`;
+
+                }
+
+            }
+
+
+            if (unlocked) {
+
+                button.textContent =
+                    isCurrent
+                        ? "Current World"
+                        : "Enter World";
+
+
+                button.onclick =
+                    () => {
+
+                        enterWorld(
+                            worldId
+                        );
+
+                    };
+
+
+                button.disabled =
+                    isCurrent;
+
+            } else {
+
+                button.textContent =
+                    "Unlock";
+
+
+                button.disabled =
+                    false;
+
+
+                button.onclick =
+                    () => {
+
+                        unlockWorld(
+                            worldId
+                        );
+
+                    };
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   UNLOCK WORLD
+========================================= */
+
 function unlockWorld(
     worldId
 ) {
 
     const world =
-        WORLDS[worldId];
+        WORLDS[
+            worldId
+        ];
 
-    if (!world) return;
+
+    if (!world) {
+
+        return;
+
+    }
 
 
     if (
@@ -1188,11 +2537,13 @@ function unlockWorld(
         );
 
         return;
+
     }
 
 
     if (
-        game.coins < world.cost
+        game.coins <
+        world.cost
     ) {
 
         showToast(
@@ -1201,6 +2552,7 @@ function unlockWorld(
         );
 
         return;
+
     }
 
 
@@ -1227,8 +2579,13 @@ function unlockWorld(
     enterWorld(
         worldId
     );
+
 }
 
+
+/* =========================================
+   ENTER WORLD
+========================================= */
 
 function enterWorld(
     worldId
@@ -1246,13 +2603,21 @@ function enterWorld(
         );
 
         return;
+
     }
 
 
     const world =
-        WORLDS[worldId];
+        WORLDS[
+            worldId
+        ];
 
-    if (!world) return;
+
+    if (!world) {
+
+        return;
+
+    }
 
 
     game.currentWorld =
@@ -1268,6 +2633,7 @@ function enterWorld(
         `Entered ${world.name}.`,
         "success"
     );
+
 }
 
 
@@ -1282,7 +2648,10 @@ function claimDailyReward() {
 
 
     const oneDay =
-        24 * 60 * 60 * 1000;
+        24 *
+        60 *
+        60 *
+        1000;
 
 
     if (
@@ -1298,12 +2667,17 @@ function claimDailyReward() {
         );
 
         return;
+
     }
 
 
-    game.coins += 500;
+    game.coins +=
+        500;
 
-    game.gems += 25;
+
+    game.gems +=
+        25;
+
 
     game.dailyClaimedAt =
         now;
@@ -1318,8 +2692,13 @@ function claimDailyReward() {
         "Daily reward claimed! +500 Coins +25 Gems",
         "success"
     );
+
 }
 
+
+/* =========================================
+   DAILY BUTTON
+========================================= */
 
 function updateDailyButton() {
 
@@ -1328,32 +2707,49 @@ function updateDailyButton() {
             "daily-button"
         );
 
+
     const status =
         document.getElementById(
             "daily-status"
         );
 
-    if (!button || !status) {
+
+    if (
+        !button ||
+        !status
+    ) {
+
         return;
+
     }
 
 
-    if (!game.dailyClaimedAt) {
+    if (
+        !game.dailyClaimedAt
+    ) {
 
-        button.disabled = false;
+        button.disabled =
+            false;
+
 
         button.textContent =
             "Claim Reward";
 
+
         status.textContent =
             "Available now";
 
+
         return;
+
     }
 
 
     const oneDay =
-        24 * 60 * 60 * 1000;
+        24 *
+        60 *
+        60 *
+        1000;
 
 
     const remaining =
@@ -1364,21 +2760,31 @@ function updateDailyButton() {
         );
 
 
-    if (remaining <= 0) {
+    if (
+        remaining <=
+        0
+    ) {
 
-        button.disabled = false;
+        button.disabled =
+            false;
+
 
         button.textContent =
             "Claim Reward";
 
+
         status.textContent =
             "Available now";
 
+
         return;
+
     }
 
 
-    button.disabled = true;
+    button.disabled =
+        true;
+
 
     button.textContent =
         "Already Claimed";
@@ -1387,7 +2793,11 @@ function updateDailyButton() {
     const hours =
         Math.floor(
             remaining /
-            (1000 * 60 * 60)
+            (
+                1000 *
+                60 *
+                60
+            )
         );
 
 
@@ -1395,14 +2805,22 @@ function updateDailyButton() {
         Math.floor(
             (
                 remaining %
-                (1000 * 60 * 60)
+                (
+                    1000 *
+                    60 *
+                    60
+                )
             ) /
-            (1000 * 60)
+            (
+                1000 *
+                60
+            )
         );
 
 
     status.textContent =
         `Next reward in ${hours}h ${minutes}m`;
+
 }
 
 
@@ -1412,20 +2830,36 @@ function updateDailyButton() {
 
 function updateUI() {
 
-    document.getElementById(
-        "coins"
-    ).textContent =
-        formatNumber(
-            game.coins
+    const coins =
+        document.getElementById(
+            "coins"
         );
 
 
-    document.getElementById(
-        "gems"
-    ).textContent =
-        formatNumber(
-            game.gems
+    const gems =
+        document.getElementById(
+            "gems"
         );
+
+
+    if (coins) {
+
+        coins.textContent =
+            formatNumber(
+                game.coins
+            );
+
+    }
+
+
+    if (gems) {
+
+        gems.textContent =
+            formatNumber(
+                game.gems
+            );
+
+    }
 
 
     const world =
@@ -1435,41 +2869,82 @@ function updateUI() {
         WORLDS.void;
 
 
-    document.getElementById(
-        "home-world"
-    ).textContent =
-        world.name;
+    const homeWorld =
+        document.getElementById(
+            "home-world"
+        );
 
 
-    document.getElementById(
-        "side-world"
-    ).textContent =
-        world.name;
+    const sideWorld =
+        document.getElementById(
+            "side-world"
+        );
 
 
-    document.getElementById(
-        "home-equipped"
-    ).textContent =
-        `${game.equipped.length} / 3`;
+    const homeEquipped =
+        document.getElementById(
+            "home-equipped"
+        );
+
+
+    const homeIncome =
+        document.getElementById(
+            "home-income"
+        );
+
+
+    const sideIncome =
+        document.getElementById(
+            "side-income"
+        );
+
+
+    if (homeWorld) {
+
+        homeWorld.textContent =
+            world.name;
+
+    }
+
+
+    if (sideWorld) {
+
+        sideWorld.textContent =
+            world.name;
+
+    }
+
+
+    if (homeEquipped) {
+
+        homeEquipped.textContent =
+            `${game.equipped.length} / 3`;
+
+    }
 
 
     const income =
         getPassiveIncome();
 
 
-    document.getElementById(
-        "home-income"
-    ).textContent =
-        `${formatNumber(income)} Coins/s`;
+    if (homeIncome) {
+
+        homeIncome.textContent =
+            `${formatNumber(income)} Coins/s`;
+
+    }
 
 
-    document.getElementById(
-        "side-income"
-    ).textContent =
-        formatNumber(income);
+    if (sideIncome) {
+
+        sideIncome.textContent =
+            formatNumber(income);
+
+    }
 
 
     updateDailyButton();
+
 }
 
 
@@ -1487,7 +2962,10 @@ function renderAll() {
 
     renderEquippedSide();
 
+    renderWorlds();
+
     updateThemeButtons();
+
 }
 
 
@@ -1504,10 +2982,14 @@ function setTheme(
             "normal",
             "dark",
             "light"
-        ].includes(theme)
+        ].includes(
+            theme
+        )
     ) {
 
-        theme = "normal";
+        theme =
+            "normal";
+
     }
 
 
@@ -1525,8 +3007,13 @@ function setTheme(
 
 
     updateThemeButtons();
+
 }
 
+
+/* =========================================
+   UPDATE THEME BUTTONS
+========================================= */
 
 function updateThemeButtons() {
 
@@ -1553,8 +3040,13 @@ function updateThemeButtons() {
 
             }
         );
+
 }
 
+
+/* =========================================
+   LOAD THEME
+========================================= */
 
 function loadTheme() {
 
@@ -1568,6 +3060,7 @@ function loadTheme() {
     setTheme(
         saved
     );
+
 }
 
 
@@ -1584,6 +3077,13 @@ function showToast(
         document.getElementById(
             "toast-container"
         );
+
+
+    if (!container) {
+
+        return;
+
+    }
 
 
     const toast =
@@ -1613,6 +3113,7 @@ function showToast(
         },
         3000
     );
+
 }
 
 
@@ -1629,7 +3130,9 @@ function resetGame() {
 
 
     if (!confirmed) {
+
         return;
+
     }
 
 
@@ -1639,8 +3142,23 @@ function resetGame() {
 
 
     game = {
+
         ...DEFAULT_SAVE,
-        lastSave: Date.now()
+
+        inventory: [],
+
+        equipped: [],
+
+        unlockedWorlds: [
+            "void"
+        ],
+
+        currentWorld:
+            "void",
+
+        lastSave:
+            Date.now()
+
     };
 
 
@@ -1652,13 +3170,16 @@ function resetGame() {
 
     renderAll();
 
-    showPage("home");
+    showPage(
+        "home"
+    );
 
 
     showToast(
         "Save reset.",
         "success"
     );
+
 }
 
 
@@ -1670,12 +3191,14 @@ loadTheme();
 
 renderAll();
 
-showPage("home");
+showPage(
+    "home"
+);
 
 
-/*
-    Save periodically.
-*/
+/* =========================================
+   PERIODIC SAVE
+========================================= */
 
 setInterval(
     () => {
@@ -1687,9 +3210,9 @@ setInterval(
 );
 
 
-/*
-    Update daily timer.
-*/
+/* =========================================
+   DAILY TIMER UPDATE
+========================================= */
 
 setInterval(
     () => {
