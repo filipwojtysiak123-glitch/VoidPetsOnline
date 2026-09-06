@@ -1,361 +1,845 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>VoidPetsOnline</title>
-
-    <meta
-        name="description"
-        content="VoidPetsOnline - Hatch eggs, collect pets, earn Diamonds, build RAP and compete in leaderboards."
-    >
-
+    <title>Void Pets Online</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <!-- =========================
-         TOP BAR
-    ========================== -->
+<div id="toast-container"></div>
 
-    <header class="topbar">
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
 
         <div class="logo">
-            VoidPetsOnline
+            <div class="logo-icon">V</div>
+            <div>
+                <div class="logo-title">VOID PETS</div>
+                <div class="logo-subtitle">ONLINE</div>
+            </div>
         </div>
 
-        <div class="currencies">
+        <nav class="navigation">
 
-            <div class="currency">
-                🪙
-                <span id="coins">0</span>
+            <button class="nav-btn active" data-page="home">
+                <span>⌂</span>
+                Home
+            </button>
+
+            <button class="nav-btn" data-page="eggs">
+                <span>🥚</span>
+                Eggs
+            </button>
+
+            <button class="nav-btn" data-page="pets">
+                <span>🐾</span>
+                Pets
+            </button>
+
+            <button class="nav-btn" data-page="inventory">
+                <span>🎒</span>
+                Inventory
+            </button>
+
+            <button class="nav-btn" data-page="worlds">
+                <span>🌍</span>
+                Worlds
+            </button>
+
+            <button class="nav-btn" data-page="shop">
+                <span>🛒</span>
+                Shop
+            </button>
+
+            <button class="nav-btn" data-page="daily">
+                <span>🎁</span>
+                Daily
+            </button>
+
+            <button class="nav-btn" data-page="leaderboards">
+                <span>🏆</span>
+                Leaderboards
+            </button>
+
+            <button class="nav-btn" data-page="clans">
+                <span>⚔️</span>
+                Clans
+            </button>
+
+            <button class="nav-btn" data-page="settings">
+                <span>⚙️</span>
+                Settings
+            </button>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="version">
+                Void Pets Online
+                <span>v0.1</span>
             </div>
-
-            <div class="currency">
-                💎
-                <span id="diamonds">0</span>
-            </div>
-
-            <div class="currency">
-                📊
-                <span id="rap">0</span> RAP
-            </div>
-
         </div>
 
-    </header>
+    </aside>
 
 
-    <!-- =========================
-         MAIN
-    ========================== -->
+    <!-- MAIN -->
+    <main class="main">
 
-    <main>
+        <!-- TOPBAR -->
+        <header class="topbar">
 
-        <!-- MENU -->
-
-        <section id="menu" class="screen">
-
-            <h1>VoidPetsOnline</h1>
-
-            <p class="subtitle">
-                Collect. Upgrade. Compete.
-            </p>
-
-            <div class="menu-buttons">
-
-                <button onclick="showScreen('eggs')">
-                    🥚 Eggs
-                </button>
-
-                <button onclick="showScreen('pets')">
-                    🐾 Pets
-                </button>
-
-                <button onclick="showScreen('leaderboards')">
-                    🏆 Leaderboards
-                </button>
-
-                <button onclick="showScreen('clans')">
-                    🛡️ Clans
-                </button>
-
-                <button onclick="showScreen('rewards')">
-                    🎁 Rewards
-                </button>
-
-                <button onclick="showScreen('races')">
-                    🏁 Clan Races
-                </button>
-
-            </div>
-
-        </section>
-
-
-        <!-- =========================
-             EGGS
-        ========================== -->
-
-        <section id="eggs" class="screen hidden">
-
-            <button class="back" onclick="showScreen('menu')">
-                ← Back
+            <button class="mobile-menu" id="mobile-menu">
+                ☰
             </button>
 
-            <h2>🥚 Eggs</h2>
-
-            <p class="subtitle">
-                Hatch eggs and discover new pets.
-            </p>
-
-            <div class="egg">
-
-                <div class="egg-image" id="egg-image">
-                    🥚
+            <div>
+                <div class="page-title" id="page-title">
+                    Home
                 </div>
 
-                <h3>Void Egg</h3>
-
-                <p>
-                    Cost:
-                    <strong>100 Coins</strong>
-                </p>
-
-                <div class="chances">
-
-                    <p>🐱 Common — 50%</p>
-                    <p>🐶 Rare — 30%</p>
-                    <p>🦊 Epic — 15%</p>
-                    <p>🐉 Legendary — 5%</p>
-
+                <div class="page-subtitle" id="page-subtitle">
+                    Welcome to the Void.
                 </div>
-
-                <button
-                    id="hatch-button"
-                    onclick="hatchEgg()"
-                >
-                    Hatch Egg
-                </button>
-
             </div>
 
-            <div
-                id="result"
-                class="result hidden"
-            ></div>
+            <div class="currency-container">
 
-        </section>
-
-
-        <!-- =========================
-             PETS
-        ========================== -->
-
-        <section id="pets" class="screen hidden">
-
-            <button class="back" onclick="showScreen('menu')">
-                ← Back
-            </button>
-
-            <h2>🐾 Your Pets</h2>
-
-            <p>
-                Total Pets:
-                <strong id="pet-count">0</strong>
-            </p>
-
-            <div id="pet-list">
-
-                <p>
-                    You don't have any pets yet.
-                </p>
-
-            </div>
-
-        </section>
-
-
-        <!-- =========================
-             LEADERBOARDS
-        ========================== -->
-
-        <section
-            id="leaderboards"
-            class="screen hidden"
-        >
-
-            <button class="back" onclick="showScreen('menu')">
-                ← Back
-            </button>
-
-            <h2>🏆 Leaderboards</h2>
-
-
-            <!-- WEEKLY -->
-
-            <div class="leaderboard">
-
-                <h3>
-                    💎 Weekly Diamonds
-                </h3>
-
-                <p>
-                    This leaderboard is based on
-                    Diamonds earned.
-                </p>
-
-                <div class="leader-row">
-                    <span>🥇 PlayerOne</span>
-                    <strong>50,000 💎</strong>
+                <div class="currency">
+                    <span class="currency-icon coin">●</span>
+                    <span id="coins">0</span>
                 </div>
 
-                <div class="leader-row">
-                    <span>🥈 VoidMaster</span>
-                    <strong>42,500 💎</strong>
-                </div>
-
-                <div class="leader-row">
-                    <span>🥉 Ne3x</span>
-                    <strong>30,000 💎</strong>
-                </div>
-
-                <div class="leader-row player-row">
-                    <span>You</span>
-                    <strong id="weekly-player">
-                        0 💎
-                    </strong>
+                <div class="currency">
+                    <span class="currency-icon gem">◆</span>
+                    <span id="gems">0</span>
                 </div>
 
             </div>
 
+        </header>
 
-            <!-- MONTHLY -->
 
-            <div class="leaderboard">
+        <!-- CONTENT -->
+        <section class="content">
 
-                <h3>
-                    📊 Monthly RAP
-                </h3>
 
-                <p>
-                    This leaderboard is based on
-                    your total RAP.
-                </p>
+            <!-- HOME -->
+            <div class="page active" id="page-home">
 
-                <div class="leader-row">
-                    <span>🥇 PlayerOne</span>
-                    <strong>1,500,000 RAP</strong>
+                <div class="hero panel">
+
+                    <div class="hero-text">
+                        <span class="small-label">WELCOME TO</span>
+
+                        <h1>VOID PETS ONLINE</h1>
+
+                        <p>
+                            Hatch mysterious pets, explore the Void,
+                            grow stronger and discover what's beyond.
+                        </p>
+
+                        <button class="btn primary" onclick="showPage('eggs')">
+                            Hatch a Pet
+                        </button>
+                    </div>
+
+                    <div class="hero-symbol">
+                        ◈
+                    </div>
+
                 </div>
 
-                <div class="leader-row">
-                    <span>🥈 VoidMaster</span>
-                    <strong>1,200,000 RAP</strong>
+
+                <div class="section-title">
+                    Announcements
                 </div>
 
-                <div class="leader-row">
-                    <span>🥉 Ne3x</span>
-                    <strong>900,000 RAP</strong>
+                <div class="panel announcement">
+
+                    <div class="announcement-icon">
+                        !
+                    </div>
+
+                    <div>
+                        <h3>Welcome to Void Pets Online!</h3>
+                        <p>
+                            This is the first playable version of the game.
+                            More worlds, pets and online features will arrive later.
+                        </p>
+                    </div>
+
                 </div>
 
-                <div class="leader-row player-row">
-                    <span>You</span>
-                    <strong id="monthly-player">
-                        0 RAP
-                    </strong>
+
+                <div class="section-title">
+                    Information
+                </div>
+
+                <div class="grid-3">
+
+                    <div class="card info-card">
+                        <div class="card-icon">🥚</div>
+                        <h3>Hatch Pets</h3>
+                        <p>
+                            Buy eggs and discover pets with different rarities
+                            and powers.
+                        </p>
+                    </div>
+
+                    <div class="card info-card">
+                        <div class="card-icon">⚡</div>
+                        <h3>Get Stronger</h3>
+                        <p>
+                            Equip your strongest pets to increase your passive
+                            coin income.
+                        </p>
+                    </div>
+
+                    <div class="card info-card">
+                        <div class="card-icon">🌌</div>
+                        <h3>Explore</h3>
+                        <p>
+                            Unlock new worlds and discover stronger pets.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="section-title">
+                    Current Progress
+                </div>
+
+                <div class="grid-3">
+
+                    <div class="stat-card panel">
+                        <span class="stat-label">CURRENT WORLD</span>
+                        <strong id="home-world">Void</strong>
+                    </div>
+
+                    <div class="stat-card panel">
+                        <span class="stat-label">EQUIPPED PETS</span>
+                        <strong id="home-equipped">0 / 3</strong>
+                    </div>
+
+                    <div class="stat-card panel">
+                        <span class="stat-label">PASSIVE INCOME</span>
+                        <strong id="home-income">0 Coins/s</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="section-title">
+                    Update Log
+                </div>
+
+                <div class="panel update-log">
+
+                    <div class="update">
+                        <span class="update-version">v0.1</span>
+
+                        <div>
+                            <h3>Playable Foundation</h3>
+                            <p>
+                                Added pets, eggs, RNG, inventory, equipment,
+                                worlds, passive earnings, offline earnings,
+                                daily rewards and saving.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="section-title">
+                    Online Features
+                </div>
+
+                <div class="grid-2">
+
+                    <div class="card locked-card">
+                        <span>💬</span>
+                        <h3>Chat</h3>
+                        <p>Requires online backend.</p>
+                        <button class="btn secondary" disabled>
+                            Coming Later
+                        </button>
+                    </div>
+
+                    <div class="card locked-card">
+                        <span>🔄</span>
+                        <h3>Trading</h3>
+                        <p>Requires online backend.</p>
+                        <button class="btn secondary" disabled>
+                            Coming Later
+                        </button>
+                    </div>
+
                 </div>
 
             </div>
 
-        </section>
 
+            <!-- EGGS -->
+            <div class="page" id="page-eggs">
 
-        <!-- =========================
-             CLANS
-        ========================== -->
-
-        <section id="clans" class="screen hidden">
-
-            <button class="back" onclick="showScreen('menu')">
-                ← Back
-            </button>
-
-            <h2>🛡️ Clans</h2>
-
-            <div class="feature-card">
-
-                <div class="feature-icon">
-                    🛡️
+                <div class="page-heading">
+                    <h2>Eggs</h2>
+                    <p>Spend Coins to hatch new pets.</p>
                 </div>
 
-                <h3>Clan System</h3>
+                <div class="egg-grid">
 
-                <p>
-                    Create or join a clan and compete
-                    with other clans.
-                </p>
+                    <div class="egg-card panel">
 
-                <button onclick="createClan()">
-                    Create Clan
-                </button>
+                        <div class="egg-visual">
+                            🥚
+                        </div>
+
+                        <div class="rarity-label common">
+                            BASIC
+                        </div>
+
+                        <h2>Basic Egg</h2>
+
+                        <p class="muted">
+                            A simple egg from the Void.
+                        </p>
+
+                        <div class="egg-price">
+                            <span class="currency-icon coin">●</span>
+                            100
+                        </div>
+
+                        <div class="chance-list">
+
+                            <div>
+                                <span>Void Cat</span>
+                                <span>50%</span>
+                            </div>
+
+                            <div>
+                                <span>Void Dog</span>
+                                <span>30%</span>
+                            </div>
+
+                            <div>
+                                <span>Void Bat</span>
+                                <span>15%</span>
+                            </div>
+
+                            <div>
+                                <span>Void Dragon</span>
+                                <span>5%</span>
+                            </div>
+
+                        </div>
+
+                        <button class="btn primary full" onclick="hatchBasicEgg()">
+                            Hatch Egg
+                        </button>
+
+                    </div>
+
+
+                    <div class="egg-card panel locked">
+
+                        <div class="egg-visual">
+                            ?
+                        </div>
+
+                        <div class="rarity-label unknown">
+                            UNKNOWN
+                        </div>
+
+                        <h2>??? Egg</h2>
+
+                        <p class="muted">
+                            Something is hiding inside.
+                        </p>
+
+                        <div class="egg-price">
+                            ??? 
+                        </div>
+
+                        <button class="btn secondary full" disabled>
+                            Locked
+                        </button>
+
+                    </div>
+
+                </div>
 
             </div>
 
-            <div id="clan-info" class="feature-card hidden"></div>
 
-        </section>
+            <!-- PETS -->
+            <div class="page" id="page-pets">
 
+                <div class="page-heading">
+                    <h2>Pets</h2>
+                    <p>Manage your collected pets.</p>
+                </div>
 
-        <!-- =========================
-             REWARDS
-        ========================== -->
+                <div class="pet-layout">
 
-        <section id="rewards" class="screen hidden">
+                    <div class="pet-list" id="pets-list">
+                    </div>
 
-            <button class="back" onclick="showScreen('menu')">
-                ← Back
-            </button>
+                    <aside class="pet-details panel" id="pet-details">
 
-            <h2>🎁 Rewards</h2>
+                        <div class="empty-state">
+                            <div>🐾</div>
+                            <h3>Select a Pet</h3>
+                            <p>
+                                Select one of your pets to view its statistics.
+                            </p>
+                        </div>
 
-            <div class="feature-card">
+                    </aside>
 
-                <h3>Future Rewards</h3>
-
-                <p>
-                    Rewards for ranks, events,
-                    clans and other achievements
-                    will appear here.
-                </p>
+                </div>
 
             </div>
 
-        </section>
+
+            <!-- INVENTORY -->
+            <div class="page" id="page-inventory">
+
+                <div class="page-heading">
+                    <h2>Inventory</h2>
+                    <p>Your collected pets.</p>
+                </div>
+
+                <div class="inventory-header panel">
+
+                    <div>
+                        <span class="stat-label">PETS</span>
+                        <strong id="inventory-count">0</strong>
+                    </div>
+
+                    <div>
+                        <span class="stat-label">EQUIPPED</span>
+                        <strong id="inventory-equipped">0 / 3</strong>
+                    </div>
+
+                </div>
+
+                <div class="pet-grid" id="inventory-list">
+                </div>
+
+            </div>
 
 
-        <!-- =========================
-             CLAN RACES
-        ========================== -->
+            <!-- WORLDS -->
+            <div class="page" id="page-worlds">
 
-        <section id="races" class="screen hidden">
+                <div class="page-heading">
+                    <h2>Worlds</h2>
+                    <p>Explore different areas of the Void.</p>
+                </div>
 
-            <button class="back" onclick="showScreen('menu')">
-                ← Back
-            </button>
+                <div class="world-grid">
 
-            <h2>🏁 Clan Races</h2>
+                    <div class="world-card panel unlocked">
 
-            <div class="feature-card">
+                        <div class="world-icon">
+                            🌌
+                        </div>
 
-                <h3>Coming Soon</h3>
+                        <div>
+                            <span class="world-status">
+                                UNLOCKED
+                            </span>
 
-                <p>
-                    Clans will compete against each
-                    other in special races.
-                </p>
+                            <h2>Void</h2>
+
+                            <p>
+                                The beginning of your journey.
+                            </p>
+
+                            <div class="world-multiplier">
+                                ×1.0 Coins
+                            </div>
+
+                            <button
+                                class="btn primary"
+                                onclick="enterWorld('void')">
+                                Enter World
+                            </button>
+                        </div>
+
+                    </div>
+
+
+                    <div class="world-card panel">
+
+                        <div class="world-icon">
+                            🌲
+                        </div>
+
+                        <div>
+                            <span class="world-status locked-status">
+                                5,000 COINS
+                            </span>
+
+                            <h2>Void Forest</h2>
+
+                            <p>
+                                A strange forest hidden inside the Void.
+                            </p>
+
+                            <div class="world-multiplier">
+                                ×2.0 Coins
+                            </div>
+
+                            <button
+                                class="btn primary"
+                                onclick="unlockWorld('forest')">
+                                Unlock
+                            </button>
+                        </div>
+
+                    </div>
+
+
+                    <div class="world-card panel locked-world">
+
+                        <div class="world-icon">
+                            ❔
+                        </div>
+
+                        <div>
+                            <span class="world-status locked-status">
+                                LOCKED
+                            </span>
+
+                            <h2>???</h2>
+
+                            <p>
+                                A forgotten world.
+                            </p>
+
+                            <button class="btn secondary" disabled>
+                                Coming Later
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SHOP -->
+            <div class="page" id="page-shop">
+
+                <div class="page-heading">
+                    <h2>Shop</h2>
+                    <p>Useful items and upgrades.</p>
+                </div>
+
+                <div class="shop-grid">
+
+                    <div class="card shop-item">
+                        <div class="shop-icon">⚡</div>
+                        <h3>Equip Slot</h3>
+                        <p>Increase your pet equip limit.</p>
+
+                        <div class="shop-price">
+                            10,000 Gems
+                        </div>
+
+                        <button class="btn secondary" disabled>
+                            Coming Later
+                        </button>
+                    </div>
+
+                    <div class="card shop-item">
+                        <div class="shop-icon">💎</div>
+                        <h3>Gem Pack</h3>
+                        <p>Premium currency system.</p>
+
+                        <div class="shop-price">
+                            Coming Later
+                        </div>
+
+                        <button class="btn secondary" disabled>
+                            Coming Later
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- DAILY -->
+            <div class="page" id="page-daily">
+
+                <div class="page-heading">
+                    <h2>Daily Reward</h2>
+                    <p>Come back every day for free rewards.</p>
+                </div>
+
+                <div class="daily-card panel">
+
+                    <div class="daily-icon">
+                        🎁
+                    </div>
+
+                    <h2>Daily Reward</h2>
+
+                    <p>
+                        Claim your daily Coins and Gems.
+                    </p>
+
+                    <div class="daily-reward">
+                        <div>
+                            <span>●</span>
+                            <strong>500</strong>
+                            Coins
+                        </div>
+
+                        <div>
+                            <span>◆</span>
+                            <strong>25</strong>
+                            Gems
+                        </div>
+                    </div>
+
+                    <button
+                        class="btn primary"
+                        id="daily-button"
+                        onclick="claimDailyReward()">
+                        Claim Reward
+                    </button>
+
+                    <div id="daily-status" class="muted">
+                        Available now
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- LEADERBOARDS -->
+            <div class="page" id="page-leaderboards">
+
+                <div class="page-heading">
+                    <h2>Leaderboards</h2>
+                    <p>Compete with other players.</p>
+                </div>
+
+                <div class="leaderboard-tabs">
+                    <button class="tab active">
+                        Weekly
+                    </button>
+
+                    <button class="tab">
+                        Monthly
+                    </button>
+                </div>
+
+                <div class="panel leaderboard">
+
+                    <div class="leader-row header">
+                        <span>#</span>
+                        <span>Player</span>
+                        <span>Score</span>
+                    </div>
+
+                    <div class="leader-row">
+                        <span>1</span>
+                        <span>VoidMaster</span>
+                        <span>1,250,000 Gems</span>
+                    </div>
+
+                    <div class="leader-row">
+                        <span>2</span>
+                        <span>NightVoid</span>
+                        <span>950,000 Gems</span>
+                    </div>
+
+                    <div class="leader-row">
+                        <span>3</span>
+                        <span>PetCollector</span>
+                        <span>720,000 Gems</span>
+                    </div>
+
+                    <div class="leader-row">
+                        <span>4</span>
+                        <span>VoidHunter</span>
+                        <span>500,000 Gems</span>
+                    </div>
+
+                    <div class="leader-row">
+                        <span>5</span>
+                        <span>Unknown</span>
+                        <span>---</span>
+                    </div>
+
+                </div>
+
+                <div class="info-box">
+                    Weekly ranking is based on Gems.
+                    Monthly ranking will use overall RAP.
+                </div>
+
+            </div>
+
+
+            <!-- CLANS -->
+            <div class="page" id="page-clans">
+
+                <div class="page-heading">
+                    <h2>Clans</h2>
+                    <p>Build a team and compete in Clan Races.</p>
+                </div>
+
+                <div class="clan-hero panel">
+
+                    <div class="clan-icon">
+                        ⚔️
+                    </div>
+
+                    <div>
+                        <h2>Clans are coming.</h2>
+
+                        <p>
+                            Create or join a clan, complete objectives
+                            and compete for rewards.
+                        </p>
+
+                        <button class="btn secondary" disabled>
+                            Coming Later
+                        </button>
+                    </div>
+
+                </div>
+
+
+                <div class="section-title">
+                    Clan Race Rewards
+                </div>
+
+                <div class="grid-3">
+
+                    <div class="card">
+                        <div class="reward-place">TOP 10</div>
+                        <h3>Best Reward</h3>
+                        <p>Exclusive rewards for the strongest clans.</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="reward-place">TOP 50</div>
+                        <h3>Medium Reward</h3>
+                        <p>Good rewards for competitive clans.</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="reward-place">TOP 100</div>
+                        <h3>Small Reward</h3>
+                        <p>Rewards for participating clans.</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SETTINGS -->
+            <div class="page" id="page-settings">
+
+                <div class="page-heading">
+                    <h2>Settings</h2>
+                    <p>Customize your Void Pets experience.</p>
+                </div>
+
+
+                <div class="settings-group">
+
+                    <div class="panel setting-card">
+
+                        <div>
+                            <h3>Appearance</h3>
+                            <p>
+                                Choose the appearance of the game.
+                            </p>
+                        </div>
+
+                        <div class="theme-switch">
+
+                            <button
+                                class="theme-btn"
+                                data-theme="normal"
+                                onclick="setTheme('normal')">
+                                🖥️ Normal
+                            </button>
+
+                            <button
+                                class="theme-btn"
+                                data-theme="dark"
+                                onclick="setTheme('dark')">
+                                🌙 Dark
+                            </button>
+
+                            <button
+                                class="theme-btn"
+                                data-theme="light"
+                                onclick="setTheme('light')">
+                                ☀️ Light
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel setting-card">
+
+                        <div>
+                            <h3>Save Data</h3>
+                            <p>
+                                Your current progress is stored locally
+                                in this browser.
+                            </p>
+                        </div>
+
+                        <button
+                            class="btn danger"
+                            onclick="resetGame()">
+                            Reset Save
+                        </button>
+
+                    </div>
+
+
+                    <div class="panel setting-card">
+
+                        <div>
+                            <h3>Game Information</h3>
+                            <p>
+                                Void Pets Online v0.1
+                            </p>
+                        </div>
+
+                        <span class="online-status">
+                            ● LOCAL
+                        </span>
+
+                    </div>
+
+                </div>
 
             </div>
 
@@ -364,25 +848,88 @@
     </main>
 
 
-    <!-- =========================
-         FOOTER
-    ========================== -->
+    <!-- RIGHT PANEL -->
+    <aside class="right-panel">
 
-    <footer>
+        <div class="right-title">
+            Player
+        </div>
 
-        <p>
-            VoidPetsOnline © 2026
-        </p>
+        <div class="player-card">
 
-        <p>
-            Game in development
-        </p>
+            <div class="player-avatar">
+                V
+            </div>
 
-    </footer>
+            <div>
+                <strong>Void Player</strong>
+                <span>Beginner</span>
+            </div>
+
+        </div>
 
 
-    <script src="script.js"></script>
+        <div class="right-section">
+
+            <div class="right-label">
+                CURRENT WORLD
+            </div>
+
+            <div class="current-world">
+                <span>🌌</span>
+                <strong id="side-world">
+                    Void
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="right-section">
+
+            <div class="right-label">
+                PASSIVE INCOME
+            </div>
+
+            <div class="income-display">
+                <strong id="side-income">
+                    0
+                </strong>
+
+                <span>Coins / sec</span>
+            </div>
+
+        </div>
+
+
+        <div class="right-section">
+
+            <div class="right-label">
+                EQUIPPED PETS
+            </div>
+
+            <div id="equipped-side-list" class="equipped-side-list">
+            </div>
+
+        </div>
+
+
+        <div class="right-section">
+
+            <button
+                class="btn primary full"
+                onclick="showPage('inventory')">
+                Manage Pets
+            </button>
+
+        </div>
+
+    </aside>
+
+</div>
+
+
+<script src="script.js"></script>
 
 </body>
-
 </html>
