@@ -8,50 +8,149 @@
     <title>VoidPetsOnline</title>
 
     <meta name="description"
-        content="VoidPetsOnline is an online pet-collecting game where you hatch eggs, collect powerful pets, earn Diamonds and compete with other players.">
+        content="VoidPetsOnline - Hatch eggs, collect pets, earn Diamonds and compete in leaderboards.">
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <header>
-        <h1>VoidPetsOnline</h1>
-        <p>Collect. Upgrade. Compete.</p>
+    <!-- TOP BAR -->
+    <header class="topbar">
+
+        <div class="logo">
+            VoidPetsOnline
+        </div>
+
+        <div class="currencies">
+
+            <div class="currency">
+                🪙 <span id="coins">1000</span>
+            </div>
+
+            <div class="currency">
+                💎 <span id="diamonds">100</span>
+            </div>
+
+        </div>
+
     </header>
 
+
+    <!-- MAIN MENU -->
     <main>
 
-        <div class="card">
-            <h2>Welcome to VoidPetsOnline!</h2>
+        <section id="menu" class="screen">
 
-            <p>
-                An online pet-collecting game where you hatch eggs,
-                collect powerful pets, earn Diamonds and compete with other players.
+            <h1>VoidPetsOnline</h1>
+
+            <p class="subtitle">
+                Collect. Upgrade. Compete.
             </p>
 
-            <button onclick="startGame()">Play</button>
-        </div>
+            <div class="menu-buttons">
 
-        <div class="card">
-            <h2>Coming Soon</h2>
+                <button onclick="showScreen('eggs')">
+                    🥚 Eggs
+                </button>
 
-            <p>
-                🐾 Pets<br>
-                🥚 Eggs<br>
-                💎 Diamonds<br>
-                🏆 Leaderboards<br>
-                🛡️ Clans<br>
-                🎁 Rewards<br>
-                🏁 Clan Races
-            </p>
-        </div>
+                <button onclick="showScreen('pets')">
+                    🐾 Pets
+                </button>
+
+                <button onclick="showScreen('leaderboards')">
+                    🏆 Leaderboards
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- EGGS -->
+        <section id="eggs" class="screen hidden">
+
+            <button class="back" onclick="showScreen('menu')">
+                ← Back
+            </button>
+
+            <h2>🥚 Eggs</h2>
+
+            <div class="egg">
+
+                <div class="egg-image">
+                    🥚
+                </div>
+
+                <h3>Void Egg</h3>
+
+                <p>Cost: 100 Coins</p>
+
+                <button onclick="hatchEgg()">
+                    Hatch Egg
+                </button>
+
+            </div>
+
+            <div id="result" class="result hidden"></div>
+
+        </section>
+
+
+        <!-- PETS -->
+        <section id="pets" class="screen hidden">
+
+            <button class="back" onclick="showScreen('menu')">
+                ← Back
+            </button>
+
+            <h2>🐾 Your Pets</h2>
+
+            <div id="pet-list">
+                <p>You don't have any pets yet.</p>
+            </div>
+
+        </section>
+
+
+        <!-- LEADERBOARDS -->
+        <section id="leaderboards" class="screen hidden">
+
+            <button class="back" onclick="showScreen('menu')">
+                ← Back
+            </button>
+
+            <h2>🏆 Leaderboards</h2>
+
+            <div class="leaderboard">
+
+                <h3>💎 Weekly Diamonds</h3>
+
+                <p>1. PlayerOne — 50,000 💎</p>
+                <p>2. VoidMaster — 42,500 💎</p>
+                <p>3. Ne3x — 30,000 💎</p>
+
+            </div>
+
+            <div class="leaderboard">
+
+                <h3>📊 Monthly RAP</h3>
+
+                <p>1. PlayerOne — 1,500,000 RAP</p>
+                <p>2. VoidMaster — 1,200,000 RAP</p>
+                <p>3. Ne3x — 900,000 RAP</p>
+
+            </div>
+
+        </section>
 
     </main>
+
 
     <footer>
         VoidPetsOnline © 2026
     </footer>
+
 
     <script src="script.js"></script>
 
