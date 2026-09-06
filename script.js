@@ -1,6 +1,7 @@
 /* =========================================
    VOID PETS ONLINE
-   VERSION 0.3
+   VERSION 0.4
+   STACKING SYSTEM
 ========================================= */
 
 
@@ -145,6 +146,440 @@ let selectedPetId = null;
 
 
 /* =========================================
+   PET STACK KEY
+========================================= */
+
+function getPetStackKey(
+    pet
+) {
+
+    return [
+
+        pet.type,
+
+        pet.variant ||
+            "normal",
+
+        pet.shiny
+            ? 1
+            : 0,
+
+        pet.huge
+            ? 1
+            : 0,
+
+        pet.secret
+            ? 1
+            : 0
+
+    ].join("|");
+
+}
+
+
+/* =========================================
+   GET STACK COUNT
+========================================= */
+
+function getPetStackCount(
+    pet
+) {
+
+    const count =
+        Number(
+            pet &&
+            pet.stack
+        );
+
+
+    if (
+        !Number.isFinite(
+            count
+        ) ||
+        count < 1
+    ) {
+
+        return 1;
+
+    }
+
+
+    return Math.floor(
+        count
+    );
+
+}
+
+
+/* =========================================
+   GET TOTAL PET COUNT
+========================================= */
+
+function getTotalPetCount(
+    state = game
+) {
+
+    if (
+        !Array.isArray(
+            state.inventory
+        )
+    ) {
+
+        return 0;
+
+    }
+
+
+    return state.inventory.reduce(
+        (
+            total,
+            pet
+        ) => {
+
+            return total +
+                getPetStackCount(
+                    pet
+                );
+
+        },
+        0
+    );
+
+}
+
+
+/* =========================================
+   COUNT EQUIPPED PETS
+========================================= */
+
+function getEquippedCount() {
+
+    if (
+        !Array.isArray(
+            game.equipped
+        )
+    ) {
+
+        return 0;
+
+    }
+
+
+    return game.equipped.length;
+
+}
+
+
+/* =========================================
+   COUNT EQUIPPED FROM STACK
+========================================= */
+
+function getEquippedFromStack(
+    petId
+) {
+
+    if (
+        !Array.isArray(
+            game.equipped
+        )
+    ) {
+
+        return 0;
+
+    }
+
+
+    return game.equipped.filter(
+        id =>
+            id ===
+            petId
+    ).length;
+
+}
+
+
+/* =========================================
+   NORMALIZE / MIGRATE STACKS
+========================================= */
+
+function normalizeInventoryStacks(
+    state
+) {
+
+    if (
+        !Array.isArray(
+            state.inventory
+        )
+    ) {
+
+        state.inventory = [];
+
+    }
+
+
+    if (
+        !Array.isArray(
+            state.equipped
+        )
+    ) {
+
+        state.equipped = [];
+
+    }
+
+
+    const oldInventory =
+        state.inventory;
+
+
+    const oldEquipped =
+        state.equipped;
+
+
+    const groups =
+        new Map();
+
+
+    const idMap =
+        new Map();
+
+
+    /*
+        Merge pets with the exact same:
+
+        type
+        material
+        shiny
+        huge
+        secret
+    */
+
+    oldInventory.forEach(
+        rawPet => {
+
+            if (
+                !rawPet ||
+                !rawPet.type
+            ) {
+
+                return;
+
+            }
+
+
+            const pet = {
+
+                ...rawPet,
+
+                stack:
+                    getPetStackCount(
+                        rawPet
+                    )
+
+            };
+
+
+            /*
+                Older saves may not have
+                all variant properties.
+            */
+
+            if (
+                typeof pet.shiny !==
+                "boolean"
+            ) {
+
+                pet.shiny = false;
+
+            }
+
+
+            if (
+                typeof pet.huge !==
+                "boolean"
+            ) {
+
+                pet.huge = false;
+
+            }
+
+
+            if (
+                typeof pet.secret !==
+                "boolean"
+            ) {
+
+                pet.secret = false;
+
+            }
+
+
+            if (
+                !pet.variant
+            ) {
+
+                pet.variant =
+                    "normal";
+
+            }
+
+
+            if (
+                !pet.variantName
+            ) {
+
+                pet.variantName =
+                    PET_VARIANTS[
+                        pet.variant
+                    ]
+                        ? PET_VARIANTS[
+                            pet.variant
+                        ].name
+                        : "Normal";
+
+            }
+
+
+            if (
+                !pet.id
+            ) {
+
+                pet.id =
+                    `stack_${Date.now()}_${Math.random()
+                        .toString(36)
+                        .substring(2, 10)}`;
+
+            }
+
+
+            const key =
+                getPetStackKey(
+                    pet
+                );
+
+
+            if (
+                !groups.has(
+                    key
+                )
+            ) {
+
+                groups.set(
+                    key,
+                    {
+                        ...pet,
+                        stack: 0
+                    }
+                );
+
+            }
+
+
+            const group =
+                groups.get(
+                    key
+                );
+
+
+            group.stack +=
+                pet.stack;
+
+
+            /*
+                Make sure the group
+                keeps useful data.
+            */
+
+            group.basePower =
+                pet.basePower ||
+                group.basePower;
+
+
+            group.power =
+                pet.power ||
+                group.power;
+
+
+            group.variantMultiplier =
+                pet.variantMultiplier ||
+                group.variantMultiplier ||
+                1;
+
+
+            group.variantName =
+                pet.variantName ||
+                group.variantName;
+
+
+            group.variantEmoji =
+                pet.variantEmoji ||
+                group.variantEmoji ||
+                "";
+
+
+            /*
+                Map old pet ID to
+                the new stack ID.
+            */
+
+            idMap.set(
+                pet.id,
+                group.id
+            );
+
+        }
+    );
+
+
+    /*
+        Build new inventory.
+    */
+
+    state.inventory =
+        Array.from(
+            groups.values()
+        );
+
+
+    /*
+        Convert old equipped IDs
+        into the new stack IDs.
+    */
+
+    state.equipped =
+        oldEquipped
+            .map(
+                oldId => {
+
+                    return (
+                        idMap.get(
+                            oldId
+                        ) ||
+                        oldId
+                    );
+
+                }
+            )
+            .filter(
+                id =>
+                    state.inventory.some(
+                        pet =>
+                            pet.id ===
+                            id
+                    )
+            )
+            .slice(
+                0,
+                3
+            );
+
+
+    return state;
+
+}
+
+
+/* =========================================
    LOAD GAME
 ========================================= */
 
@@ -159,8 +594,12 @@ function loadGame() {
     if (!saved) {
 
         return {
+
             ...DEFAULT_SAVE,
-            lastSave: Date.now()
+
+            lastSave:
+                Date.now()
+
         };
 
     }
@@ -169,12 +608,17 @@ function loadGame() {
     try {
 
         const parsed =
-            JSON.parse(saved);
+            JSON.parse(
+                saved
+            );
 
 
-        const loaded = {
+        let loaded = {
+
             ...DEFAULT_SAVE,
+
             ...parsed
+
         };
 
 
@@ -213,13 +657,39 @@ function loadGame() {
         }
 
 
+        /*
+            STACK MIGRATION
+        */
+
+        loaded =
+            normalizeInventoryStacks(
+                loaded
+            );
+
+
+        /*
+            Remove invalid equipped IDs.
+        */
+
         loaded.equipped =
             loaded.equipped.filter(
                 id =>
                     loaded.inventory.some(
                         pet =>
-                            pet.id === id
+                            pet.id ===
+                            id
                     )
+            );
+
+
+        /*
+            Maximum 3 equipped pets.
+        */
+
+        loaded.equipped =
+            loaded.equipped.slice(
+                0,
+                3
             );
 
 
@@ -258,7 +728,8 @@ function loadGame() {
 
         const seconds =
             Math.floor(
-                offlineTime / 1000
+                offlineTime /
+                1000
             );
 
 
@@ -310,6 +781,18 @@ function loadGame() {
             now;
 
 
+        /*
+            Save migrated data.
+        */
+
+        localStorage.setItem(
+            "voidPetsSave",
+            JSON.stringify(
+                loaded
+            )
+        );
+
+
         return loaded;
 
 
@@ -322,8 +805,12 @@ function loadGame() {
 
 
         return {
+
             ...DEFAULT_SAVE,
-            lastSave: Date.now()
+
+            lastSave:
+                Date.now()
+
         };
 
     }
@@ -343,7 +830,9 @@ function saveGame() {
 
     localStorage.setItem(
         "voidPetsSave",
-        JSON.stringify(game)
+        JSON.stringify(
+            game
+        )
     );
 
 }
@@ -392,7 +881,9 @@ function getPetPower(
 
 
     const definition =
-        PETS[pet.type];
+        PETS[
+            pet.type
+        ];
 
 
     if (!definition) {
@@ -415,7 +906,8 @@ function getEquippedPower(
     state = game
 ) {
 
-    let total = 0;
+    let total =
+        0;
 
 
     if (
@@ -490,8 +982,11 @@ function getWorldMultiplier() {
 function getPassiveIncome() {
 
     return (
+
         getEquippedPower() *
+
         getWorldMultiplier()
+
     );
 
 }
@@ -866,10 +1361,11 @@ function rollMaterialVariant() {
 function rollShiny() {
 
     return (
+
         Math.random() *
         100
-    ) <
-    SHINY_CHANCE;
+
+    ) < SHINY_CHANCE;
 
 }
 
@@ -881,10 +1377,11 @@ function rollShiny() {
 function rollHuge() {
 
     return (
+
         Math.random() *
         100
-    ) <
-    HUGE_CHANCE;
+
+    ) < HUGE_CHANCE;
 
 }
 
@@ -896,10 +1393,11 @@ function rollHuge() {
 function rollSecret() {
 
     return (
+
         Math.random() *
         100
-    ) <
-    SECRET_CHANCE;
+
+    ) < SECRET_CHANCE;
 
 }
 
@@ -917,8 +1415,8 @@ function createHatchedPet(
 
 
     /*
-        EVERY VARIANT IS ROLLED
-        SEPARATELY.
+        Every variant rolls
+        independently.
 
         This means:
 
@@ -948,7 +1446,7 @@ function createHatchedPet(
 
 
     /*
-        START WITH GOLD / RAINBOW
+        START WITH MATERIAL
         MULTIPLIER.
     */
 
@@ -957,7 +1455,7 @@ function createHatchedPet(
 
 
     /*
-        SHINY STACKS WITH EVERYTHING.
+        SHINY STACKS.
     */
 
     if (shiny) {
@@ -969,7 +1467,7 @@ function createHatchedPet(
 
 
     /*
-        HUGE STACKS WITH EVERYTHING.
+        HUGE STACKS.
     */
 
     if (huge) {
@@ -981,10 +1479,7 @@ function createHatchedPet(
 
 
     /*
-        SECRET STACKS WITH EVERYTHING.
-
-        Secret is the strongest
-        special variant.
+        SECRET STACKS.
     */
 
     if (secret) {
@@ -996,7 +1491,7 @@ function createHatchedPet(
 
 
     /*
-        FINAL POWER
+        FINAL POWER.
     */
 
     const power =
@@ -1010,7 +1505,8 @@ function createHatchedPet(
        BUILD VARIANT NAME
     ===================================== */
 
-    const variantParts = [];
+    const variantParts =
+        [];
 
 
     if (secret) {
@@ -1054,7 +1550,11 @@ function createHatchedPet(
 
     const variantName =
         variantParts.length > 0
-            ? variantParts.join(" ")
+
+            ? variantParts.join(
+                " "
+            )
+
             : "Normal";
 
 
@@ -1062,7 +1562,8 @@ function createHatchedPet(
        BUILD VARIANT EMOJIS
     ===================================== */
 
-    const variantEmojis = [];
+    const variantEmojis =
+        [];
 
 
     if (secret) {
@@ -1123,13 +1624,13 @@ function createHatchedPet(
 
 
     /* =====================================
-       RETURN PET
+       RETURN NEW STACKABLE PET
     ===================================== */
 
     return {
 
         id:
-            `${type}_${Date.now()}_${Math.random()
+            `stack_${type}_${Date.now()}_${Math.random()
                 .toString(36)
                 .substring(2, 10)}`,
 
@@ -1139,33 +1640,21 @@ function createHatchedPet(
         obtainedAt:
             Date.now(),
 
-
         /*
-            MATERIAL
+            Material variant.
         */
 
         variant:
             material.name.toLowerCase(),
 
-
-        /*
-            FULL VARIANT NAME
-        */
-
         variantName:
             variantName,
-
-
-        /*
-            EMOJIS
-        */
 
         variantEmoji:
             variantEmoji,
 
-
         /*
-            SPECIAL FLAGS
+            Special variants.
         */
 
         shiny:
@@ -1177,9 +1666,8 @@ function createHatchedPet(
         secret:
             secret,
 
-
         /*
-            POWER
+            Power.
         */
 
         basePower:
@@ -1189,9 +1677,103 @@ function createHatchedPet(
             multiplier,
 
         power:
-            power
+            power,
+
+        /*
+            STACK SIZE
+        */
+
+        stack:
+            1
 
     };
+
+}
+
+
+/* =========================================
+   ADD PET TO INVENTORY
+========================================= */
+
+function addPetToInventory(
+    pet
+) {
+
+    /*
+        Find an existing stack with
+        EXACTLY the same pet type
+        and variants.
+    */
+
+    const stackKey =
+        getPetStackKey(
+            pet
+        );
+
+
+    const existing =
+        game.inventory.find(
+            existingPet =>
+                getPetStackKey(
+                    existingPet
+                ) ===
+                stackKey
+        );
+
+
+    if (existing) {
+
+        existing.stack =
+            getPetStackCount(
+                existing
+            ) + 1;
+
+
+        /*
+            Keep the strongest / correct
+            power data.
+        */
+
+        existing.power =
+            pet.power;
+
+
+        existing.basePower =
+            pet.basePower;
+
+
+        existing.variantMultiplier =
+            pet.variantMultiplier;
+
+
+        existing.variantName =
+            pet.variantName;
+
+
+        existing.variantEmoji =
+            pet.variantEmoji;
+
+
+        return existing;
+
+    }
+
+
+    /*
+        No matching stack found.
+        Create a new one.
+    */
+
+    pet.stack =
+        1;
+
+
+    game.inventory.push(
+        pet
+    );
+
+
+    return pet;
 
 }
 
@@ -1235,13 +1817,23 @@ function hatchBasicEgg() {
         );
 
 
-    game.inventory.push(
-        pet
-    );
+    /*
+        ADD TO STACK
+        OR CREATE NEW STACK.
+    */
 
+    const stack =
+        addPetToInventory(
+            pet
+        );
+
+
+    /*
+        Select the stack.
+    */
 
     selectedPetId =
-        pet.id;
+        stack.id;
 
 
     saveGame();
@@ -1265,7 +1857,7 @@ function hatchBasicEgg() {
 
 
     showToast(
-        `You hatched ${variantText}${definition.name}!`,
+        `You hatched ${variantText}${definition.name}! ×${stack.stack}`,
         "success"
     );
 
@@ -1273,7 +1865,48 @@ function hatchBasicEgg() {
 
 
 /* =========================================
-   RENDER PETS
+   GET DISPLAY NAME
+========================================= */
+
+function getPetDisplayName(
+    pet
+) {
+
+    const definition =
+        PETS[
+            pet.type
+        ];
+
+
+    if (!definition) {
+
+        return "Unknown Pet";
+
+    }
+
+
+    const variantName =
+        pet.variantName ||
+        "Normal";
+
+
+    if (
+        variantName ===
+        "Normal"
+    ) {
+
+        return definition.name;
+
+    }
+
+
+    return `${variantName} ${definition.name}`;
+
+}
+
+
+/* =========================================
+   RENDER PETS LIST
 ========================================= */
 
 function renderPetsList() {
@@ -1357,13 +1990,19 @@ function renderPetsList() {
 
 
             const equipped =
-                game.equipped.includes(
+                getEquippedFromStack(
                     pet.id
                 );
 
 
             const power =
                 getPetPower(
+                    pet
+                );
+
+
+            const stack =
+                getPetStackCount(
                     pet
                 );
 
@@ -1379,12 +2018,9 @@ function renderPetsList() {
 
 
             const displayName =
-                variantName ===
-                "Normal"
-
-                    ? definition.name
-
-                    : `${variantName} ${definition.name}`;
+                getPetDisplayName(
+                    pet
+                );
 
 
             const card =
@@ -1462,14 +2098,21 @@ function renderPetsList() {
                 </div>
 
 
+                <div class="pet-stack">
+
+                    ×${formatNumber(stack)}
+
+                </div>
+
+
                 ${
-                    pet.secret
+                    equipped > 0
 
                     ? `
 
                         <div class="equipped-badge">
 
-                            SECRET
+                            EQUIPPED ${equipped}/${stack}
 
                         </div>
 
@@ -1480,13 +2123,13 @@ function renderPetsList() {
 
 
                 ${
-                    equipped
+                    pet.secret
 
                     ? `
 
                         <div class="equipped-badge">
 
-                            EQUIPPED
+                            SECRET
 
                         </div>
 
@@ -1594,8 +2237,14 @@ function renderPetDetails() {
 
 
     const equipped =
-        game.equipped.includes(
+        getEquippedFromStack(
             pet.id
+        );
+
+
+    const stack =
+        getPetStackCount(
+            pet
         );
 
 
@@ -1603,6 +2252,11 @@ function renderPetDetails() {
         getPetPower(
             pet
         );
+
+
+    const totalStackPower =
+        power *
+        stack;
 
 
     const variantName =
@@ -1621,12 +2275,16 @@ function renderPetDetails() {
 
 
     const displayName =
-        variantName ===
-        "Normal"
+        getPetDisplayName(
+            pet
+        );
 
-            ? definition.name
 
-            : `${variantName} ${definition.name}`;
+    const canEquip =
+        equipped <
+        stack &&
+        getEquippedCount() <
+        3;
 
 
     container.innerHTML = `
@@ -1680,11 +2338,50 @@ function renderPetDetails() {
             <div class="detail-stat">
 
                 <span>
+                    Stack
+                </span>
+
+                <strong>
+                    ×${formatNumber(stack)}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-stat">
+
+                <span>
+                    Equipped
+                </span>
+
+                <strong>
+                    ${equipped} / ${stack}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-stat">
+
+                <span>
                     Power
                 </span>
 
                 <strong>
                     ${formatNumber(power)}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-stat">
+
+                <span>
+                    Total Stack Power
+                </span>
+
+                <strong>
+                    ${formatNumber(totalStackPower)}
                 </strong>
 
             </div>
@@ -1816,7 +2513,7 @@ function renderPetDetails() {
 
 
         ${
-            equipped
+            equipped > 0
 
             ? `
 
@@ -1825,7 +2522,27 @@ function renderPetDetails() {
                     onclick="unequipPet('${pet.id}')"
                 >
 
-                    Unequip
+                    Unequip One
+
+                </button>
+
+            `
+
+            : ""
+        }
+
+
+        ${
+            canEquip
+
+            ? `
+
+                <button
+                    class="btn primary full"
+                    onclick="equipPet('${pet.id}')"
+                >
+
+                    Equip One
 
                 </button>
 
@@ -1835,10 +2552,17 @@ function renderPetDetails() {
 
                 <button
                     class="btn primary full"
-                    onclick="equipPet('${pet.id}')"
+                    disabled
                 >
 
-                    Equip
+                    ${
+                        getEquippedCount() >= 3
+
+                        ? "Equip Limit Reached"
+
+                        : "No More Available"
+
+                    }
 
                 </button>
 
@@ -1858,15 +2582,23 @@ function equipPet(
     petId
 ) {
 
-    if (
-        game.equipped.includes(
-            petId
-        )
-    ) {
+    const pet =
+        game.inventory.find(
+            p =>
+                p.id ===
+                petId
+        );
+
+
+    if (!pet) {
 
         return;
 
     }
+
+
+    const equippedTotal =
+        getEquippedCount();
 
 
     const equipLimit =
@@ -1874,7 +2606,7 @@ function equipPet(
 
 
     if (
-        game.equipped.length >=
+        equippedTotal >=
         equipLimit
     ) {
 
@@ -1888,20 +2620,50 @@ function equipPet(
     }
 
 
-    const exists =
-        game.inventory.some(
-            pet =>
-                pet.id ===
-                petId
+    const stack =
+        getPetStackCount(
+            pet
         );
 
 
-    if (!exists) {
+    const equippedFromStack =
+        getEquippedFromStack(
+            petId
+        );
+
+
+    if (
+        equippedFromStack >=
+        stack
+    ) {
+
+        showToast(
+            "You don't have more of this pet to equip.",
+            "error"
+        );
 
         return;
 
     }
 
+
+    /*
+        Same ID can appear multiple
+        times in equipped.
+
+        Example:
+
+        Void Cat ×20
+
+        equipped:
+        [
+            "stack_id",
+            "stack_id",
+            "stack_id"
+        ]
+
+        = 3 Void Cats equipped.
+    */
 
     game.equipped.push(
         petId
@@ -1922,19 +2684,38 @@ function equipPet(
 
 
 /* =========================================
-   UNEQUIP PET
+   UNEQUIP ONE PET
 ========================================= */
 
 function unequipPet(
     petId
 ) {
 
-    game.equipped =
-        game.equipped.filter(
-            id =>
-                id !==
-                petId
+    /*
+        Remove only ONE copy
+        from equipped.
+    */
+
+    const index =
+        game.equipped.lastIndexOf(
+            petId
         );
+
+
+    if (
+        index ===
+        -1
+    ) {
+
+        return;
+
+    }
+
+
+    game.equipped.splice(
+        index,
+        1
+    );
 
 
     saveGame();
@@ -1943,7 +2724,7 @@ function unequipPet(
 
 
     showToast(
-        "Pet unequipped.",
+        "One pet unequipped.",
         "success"
     );
 
@@ -1987,6 +2768,12 @@ function renderInventory() {
 
     if (count) {
 
+        /*
+            Show number of STACKS,
+            because that is the amount
+            of inventory entries.
+        */
+
         count.textContent =
             game.inventory.length;
 
@@ -1996,7 +2783,7 @@ function renderInventory() {
     if (equippedCount) {
 
         equippedCount.textContent =
-            `${game.equipped.length} / 3`;
+            `${getEquippedCount()} / 3`;
 
     }
 
@@ -2051,13 +2838,19 @@ function renderInventory() {
 
 
             const equipped =
-                game.equipped.includes(
+                getEquippedFromStack(
                     pet.id
                 );
 
 
             const power =
                 getPetPower(
+                    pet
+                );
+
+
+            const stack =
+                getPetStackCount(
                     pet
                 );
 
@@ -2073,12 +2866,9 @@ function renderInventory() {
 
 
             const displayName =
-                variantName ===
-                "Normal"
-
-                    ? definition.name
-
-                    : `${variantName} ${definition.name}`;
+                getPetDisplayName(
+                    pet
+                );
 
 
             const card =
@@ -2144,14 +2934,21 @@ function renderInventory() {
                 </div>
 
 
+                <div class="pet-stack">
+
+                    ×${formatNumber(stack)}
+
+                </div>
+
+
                 ${
-                    equipped
+                    equipped > 0
 
                     ? `
 
                         <div class="equipped-badge">
 
-                            EQUIPPED
+                            EQUIPPED ${equipped}/${stack}
 
                         </div>
 
@@ -2234,8 +3031,61 @@ function renderEquippedSide() {
     }
 
 
+    /*
+        Group equipped IDs.
+
+        Example:
+
+        [
+            cat,
+            cat,
+            dragon
+        ]
+
+        becomes:
+
+        cat ×2
+        dragon ×1
+    */
+
+    const equippedGroups =
+        new Map();
+
+
     game.equipped.forEach(
         petId => {
+
+            if (
+                equippedGroups.has(
+                    petId
+                )
+            ) {
+
+                equippedGroups.set(
+                    petId,
+                    equippedGroups.get(
+                        petId
+                    ) + 1
+                );
+
+            } else {
+
+                equippedGroups.set(
+                    petId,
+                    1
+                );
+
+            }
+
+        }
+    );
+
+
+    equippedGroups.forEach(
+        (
+            quantity,
+            petId
+        ) => {
 
             const pet =
                 game.inventory.find(
@@ -2271,6 +3121,11 @@ function renderEquippedSide() {
                 );
 
 
+            const totalPower =
+                power *
+                quantity;
+
+
             const variantName =
                 pet.variantName ||
                 "Normal";
@@ -2282,12 +3137,9 @@ function renderEquippedSide() {
 
 
             const displayName =
-                variantName ===
-                "Normal"
-
-                    ? definition.name
-
-                    : `${variantName} ${definition.name}`;
+                getPetDisplayName(
+                    pet
+                );
 
 
             const element =
@@ -2313,13 +3165,14 @@ function renderEquippedSide() {
 
                     ${variantEmoji}
                     ${displayName}
+                    ×${quantity}
 
                 </span>
 
 
                 <span class="side-pet-power">
 
-                    ${formatNumber(power)}
+                    ${formatNumber(totalPower)}
 
                 </span>
 
@@ -2449,7 +3302,9 @@ function renderWorlds() {
 
                     status.textContent =
                         `${formatNumber(
-                            WORLDS[worldId].cost
+                            WORLDS[
+                                worldId
+                            ].cost
                         )} COINS`;
 
                 }
@@ -2461,7 +3316,9 @@ function renderWorlds() {
 
                 button.textContent =
                     isCurrent
+
                         ? "Current World"
+
                         : "Enter World";
 
 
@@ -2918,7 +3775,7 @@ function updateUI() {
     if (homeEquipped) {
 
         homeEquipped.textContent =
-            `${game.equipped.length} / 3`;
+            `${getEquippedCount()} / 3`;
 
     }
 
